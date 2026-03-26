@@ -1,0 +1,8 @@
+panel/config.php
+
+# Entorno local / editor
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.cursor/

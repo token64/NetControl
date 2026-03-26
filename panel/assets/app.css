@@ -1,0 +1,98 @@
+/* NetControl — panel WISP */
+:root {
+  --nc-bg: #0b0f14;
+  --nc-surface: #121922;
+  --nc-accent: #3dd6c6;
+  --nc-accent-dim: #2a9d8f;
+  --nc-text: #e8eef4;
+  --nc-muted: #8b9aab;
+  --nc-danger: #ff6b6b;
+  --nc-warning: #ffc857;
+}
+
+.nc-body {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  background: var(--nc-bg);
+  color: var(--nc-text);
+  min-height: 100vh;
+}
+
+.nc-navbar {
+  background: rgba(18, 25, 34, 0.92) !important;
+  backdrop-filter: blur(10px);
+}
+
+.nc-brand {
+  letter-spacing: 0.04em;
+  color: var(--nc-accent) !important;
+}
+
+.nc-card {
+  background: var(--nc-surface);
+  border: 1px solid rgba(61, 214, 198, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.table.nc-table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--nc-text);
+  --bs-table-border-color: rgba(139, 154, 171, 0.2);
+}
+
+.table.nc-table thead th {
+  color: var(--nc-muted);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-nc-ok {
+  background: rgba(61, 214, 198, 0.15);
+  color: var(--nc-accent);
+  border: 1px solid rgba(61, 214, 198, 0.35);
+}
+
+.badge-nc-off {
+  background: rgba(255, 107, 107, 0.12);
+  color: var(--nc-danger);
+  border: 1px solid rgba(255, 107, 107, 0.35);
+}
+
+.form-control, .form-select {
+  background: #0e141c;
+  border-color: rgba(139, 154, 171, 0.25);
+  color: var(--nc-text);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--nc-accent-dim);
+  box-shadow: 0 0 0 0.2rem rgba(61, 214, 198, 0.2);
+  background: #0e141c;
+  color: var(--nc-text);
+}
+
+.btn-nc-primary {
+  background: linear-gradient(135deg, var(--nc-accent), var(--nc-accent-dim));
+  border: none;
+  color: #042a26;
+  font-weight: 600;
+}
+
+.btn-nc-primary:hover {
+  filter: brightness(1.06);
+  color: #042a26;
+}
+
+.nc-flash {
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.nc-map-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(61, 214, 198, 0.15);
+  min-height: 520px;
+}

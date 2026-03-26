@@ -1,0 +1,307 @@
+ESTRUCTURA FINAL COMPLETA
+panel/
+│── config.php
+│── db.php
+│── funciones.php
+│── mikrotik.php
+│── smarolt.php
+│── index.php
+│── crear.php
+│── cortar.php
+│── pagar.php
+│── eliminar.php
+│── mapa.php
+│── auto_corte.php
+1️⃣ config.php
+<?php
+// Configuración general
+
+// MikroTik default (puedes añadir más en tabla mikrotiks)
+$default_user = "admin";
+$default_pass = "TU_PASSWORD";
+
+// SmarOLT
+$smarolt_api = "TU_API_KEY";
+
+// Google Maps API
+$google_maps_key = "TU_GOOGLE_MAPS_KEY";
+?>
+2️⃣ db.php
+<?php
+// Conexión a la base de datos
+$conn = mysqli_connect("localhost","root","","panel_wisp");
+if(!$conn){
+    die("Error DB: ".mysqli_connect_error());
+}
+?>
+3️⃣ funciones.php
+<?php
+include "db.php";
+include "config.php";
+include "mikrotik.php";
+
+// Conectar a MikroTik dinámicamente
+function conectar_mikrotik($mikrotik_id){
+    global $conn;
+
+    $m = mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM mikrotiks WHERE id=$mikrotik_id"));
+    require('routeros_api.class.php');
+    $API = new RouterosAPI();
+    $API->connect($m['ip'], $m['usuario'], $m['password']);
+    return $API;
+}
+
+// Detectar IP libre
+function ipLibre($mikrotik_id, $rango){
+    $API = conectar_mikrotik($mikrotik_id);
+    $usadas = $API->comm("/ip/address/print");
+    $ips_usadas = [];
+    foreach($usadas as $u){
+        $ips_usadas[] = explode("/", $u['address'])[0];
+    }
+    list($inicio,$fin) = explode("-", $rango);
+    $start = ip2long($inicio);
+    $end   = ip2long($fin);
+    for($i=$start; $i<=$end; $i++){
+        $ip = long2ip($i);
+        if(!in_array($ip, $ips_usadas)){
+            return $ip;
+        }
+    }
+    return false;
+}
+?>
+4️⃣ mikrotik.php
+<?php
+require('routeros_api.class.php'); // https://github.com/EvilFreelancer/routeros-api-php
+?>
+5️⃣ smarolt.php
+<?php
+include "config.php";
+
+function smarolt($endpoint, $data = []){
+    global $smarolt_api;
+    $ch = curl_init("https://api.smarolt.com/v1/".$endpoint);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "X-API-KEY: $smarolt_api",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    $res = curl_exec($ch);
+    curl_close($ch);
+    return json_decode($res, true);
+}
+?>
+6️⃣ index.php (Panel bonito)
+<?php
+include "db.php";
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Panel WISP</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white">
+<div class="container mt-4">
+
+<h2>🚀 Panel WISP PRO</h2>
+<a href="crear.php" class="btn btn-success">➕ Nuevo Cliente</a>
+<a href="mapa.php" class="btn btn-info">🗺️ Ver Mapa</a>
+<hr>
+
+<table class="table table-dark table-striped">
+<tr>
+<th>Nombre</th>
+<th>Plan</th>
+<th>Estado</th>
+<th>Acciones</th>
+</tr>
+
+<?php
+$clientes = mysqli_query($conn,"SELECT * FROM clientes");
+while($c = mysqli_fetch_assoc($clientes)){
+?>
+<tr>
+<td><?php echo $c['nombre']; ?></td>
+<td><?php echo $c['plan']; ?></td>
+<td>
+<?php echo $c['estado']=="activo" ? "<span class='text-success'>🟢 Activo</span>" : "<span class='text-danger'>🔴 Suspendido</span>"; ?>
+</td>
+<td>
+<a href="pagar.php?id=<?php echo $c['id']; ?>" class="btn btn-success btn-sm">💰</a>
+<a href="cortar.php?id=<?php echo $c['id']; ?>" class="btn btn-danger btn-sm">🔴</a>
+<a href="eliminar.php?id=<?php echo $c['id']; ?>" class="btn btn-warning btn-sm">❌</a>
+</td>
+</tr>
+<?php } ?>
+</table>
+
+</div>
+</body>
+</html>
+7️⃣ crear.php
+<?php
+include "db.php";
+include "config.php";
+include "funciones.php";
+
+if($_POST){
+    $nombre = $_POST['nombre'];
+    $cedula = $_POST['cedula'];
+    $telefono = $_POST['telefono'];
+    $direccion = $_POST['direccion'];
+    $lat = $_POST['lat'];
+    $lon = $_POST['lon'];
+    $tipo = $_POST['tipo']; // pppoe o ip
+    $mikrotik_id = $_POST['mikrotik'];
+    $plan = $_POST['plan'];
+
+    $API = conectar_mikrotik($mikrotik_id);
+
+    if($tipo=="pppoe"){
+        $user = $_POST['user'];
+        $pass = $_POST['pass'];
+        $API->comm("/ppp/secret/add", [
+            "name"=>$user,
+            "password"=>$pass,
+            "service"=>"pppoe",
+            "profile"=>$plan
+        ]);
+    }
+
+    if($tipo=="ip"){
+        $ip = ipLibre($mikrotik_id, "192.168.10.2-192.168.10.254");
+        $API->comm("/queue/simple/add", [
+            "target"=>$ip,
+            "max-limit"=>"10M/10M"
+        ]);
+    }
+
+    mysqli_query($conn,"INSERT INTO clientes (nombre,cedula,telefono,direccion,latitud,longitud,usuario,password,plan,tipo_conexion,ip_fija,mikrotik_id,estado)
+    VALUES('$nombre','$cedula','$telefono','$direccion','$lat','$lon','$user','$pass','$plan','$tipo','$ip','$mikrotik_id','activo')");
+    echo "✅ Cliente creado";
+}
+?>
+
+<form method="POST">
+Nombre <input name="nombre"><br>
+Cédula <input name="cedula"><br>
+Teléfono <input name="telefono"><br>
+Dirección <input name="direccion"><br>
+Lat <input id="lat" name="lat"><br>
+Lon <input id="lon" name="lon"><br>
+<button type="button" onclick="getLocation()">📍 Obtener ubicación</button><br>
+Tipo <select name="tipo"><option value="pppoe">PPPoE</option><option value="ip">IP Fija</option></select><br>
+Usuario <input name="user"><br>
+Password <input name="pass"><br>
+Plan <select name="plan"><option value="plan_5m">5M</option><option value="plan_10m">10M</option><option value="plan_20m">20M</option></select><br>
+MikroTik <select name="mikrotik"><option value="1">MikroTik 1</option></select><br>
+<button>Crear</button>
+</form>
+
+<script>
+function getLocation(){
+    navigator.geolocation.getCurrentPosition(function(pos){
+        document.getElementById("lat").value = pos.coords.latitude;
+        document.getElementById("lon").value = pos.coords.longitude;
+    });
+}
+</script>
+8️⃣ cortar.php
+<?php
+include "db.php";
+include "funciones.php";
+
+$id = $_GET['id'];
+$c = mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM clientes WHERE id=$id"));
+$API = conectar_mikrotik($c['mikrotik_id']);
+
+$get = $API->comm("/ppp/secret/print", ["?name"=>$c['usuario']]);
+$idmik = $get[0]['.id'];
+
+$API->comm("/ppp/secret/set", [".id"=>$idmik,"disabled"=>"yes"]);
+mysqli_query($conn,"UPDATE clientes SET estado='suspendido' WHERE id=$id");
+echo "🔴 Cortado";
+?>
+9️⃣ pagar.php
+<?php
+include "db.php";
+include "funciones.php";
+
+$id = $_GET['id'];
+$c = mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM clientes WHERE id=$id"));
+$API = conectar_mikrotik($c['mikrotik_id']);
+
+$get = $API->comm("/ppp/secret/print", ["?name"=>$c['usuario']]);
+$idmik = $get[0]['.id'];
+
+$API->comm("/ppp/secret/set", [".id"=>$idmik,"disabled"=>"no"]);
+mysqli_query($conn,"UPDATE clientes SET estado='activo', fecha_pago=DATE_ADD(CURDATE(), INTERVAL 30 DAY) WHERE id=$id");
+echo "🟢 Activado";
+?>
+🔟 eliminar.php
+<?php
+include "db.php";
+include "funciones.php";
+
+$id = $_GET['id'];
+$c = mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM clientes WHERE id=$id"));
+$API = conectar_mikrotik($c['mikrotik_id']);
+
+$get = $API->comm("/ppp/secret/print", ["?name"=>$c['usuario']]);
+$idmik = $get[0]['.id'];
+
+$API->comm("/ppp/secret/remove", [".id"=>$idmik]);
+mysqli_query($conn,"DELETE FROM clientes WHERE id=$id");
+echo "❌ Eliminado";
+?>
+1️⃣1️⃣ mapa.php
+<?php
+include "db.php";
+include "config.php";
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mapa Clientes</title>
+<script src="https://maps.googleapis.com/maps/api/js?key=<?php echo $google_maps_key; ?>"></script>
+</head>
+<body>
+<div id="map" style="height:500px;"></div>
+
+<script>
+var map = new google.maps.Map(document.getElementById('map'), {zoom:13, center:{lat:18.5,lng:-69.9}});
+<?php
+$clientes = mysqli_query($conn,"SELECT * FROM clientes WHERE latitud IS NOT NULL");
+while($c = mysqli_fetch_assoc($clientes)){
+?>
+new google.maps.Marker({
+    position:{lat:<?php echo $c['latitud']; ?>,lng:<?php echo $c['longitud']; ?>},
+    map: map,
+    title:"<?php echo $c['nombre']; ?>"
+});
+<?php } ?>
+</script>
+</body>
+</html>
+1️⃣2️⃣ auto_corte.php
+<?php
+include "db.php";
+include "funciones.php";
+
+$hoy = date("Y-m-d");
+$clientes = mysqli_query($conn,"SELECT * FROM clientes WHERE fecha_pago < '$hoy'");
+
+while($c = mysqli_fetch_assoc($clientes)){
+    $API = conectar_mikrotik($c['mikrotik_id']);
+    $get = $API->comm("/ppp/secret/print", ["?name"=>$c['usuario']]);
+    $idmik = $get[0]['.id'];
+    $API->comm("/ppp/secret/set", [".id"=>$idmik,"disabled"=>"yes"]);
+    mysqli_query($conn,"UPDATE clientes SET estado='suspendido' WHERE id=".$c['id']);
+}
+?>
