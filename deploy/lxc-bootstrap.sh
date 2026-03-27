@@ -67,9 +67,11 @@ $t = file_get_contents($cfg);
 $t = str_replace("const DB_USER = 'root'", "const DB_USER = 'netcontrol'", $t);
 $t = str_replace("const DB_PASS = ''", "const DB_PASS = '" . addcslashes((string) getenv('DBPASS'), "'\\") . "'", $t);
 $adminHash = password_hash('admin', PASSWORD_DEFAULT);
-$t = preg_replace(
+$t = preg_replace_callback(
     '/^const ADMIN_PASSWORD_HASH = .*$/m',
-    'const ADMIN_PASSWORD_HASH = ' . var_export($adminHash, true) . ';',
+    static function () use ($adminHash): string {
+        return 'const ADMIN_PASSWORD_HASH = ' . var_export($adminHash, true) . ';';
+    },
     $t,
     1
 );
