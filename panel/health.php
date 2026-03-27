@@ -15,7 +15,7 @@ if (! is_readable($config)) {
 }
 
 require $config;
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/includes/db.php';
 
 try {
     db()->query('SELECT 1');
