@@ -53,7 +53,6 @@ mysql --protocol=socket -u root -e \
    FLUSH PRIVILEGES;"
 
 export TARGET DBPASS
-export ADMIN_HASH="$(php -r 'echo password_hash("admin", PASSWORD_DEFAULT);')"
 export CRON_SECRET="$(openssl rand -hex 24)"
 export INSTALL_TOKEN="$(openssl rand -hex 16)"
 
@@ -67,9 +66,10 @@ copy($src, $cfg);
 $t = file_get_contents($cfg);
 $t = str_replace("const DB_USER = 'root'", "const DB_USER = 'netcontrol'", $t);
 $t = str_replace("const DB_PASS = ''", "const DB_PASS = '" . addcslashes((string) getenv('DBPASS'), "'\\") . "'", $t);
+$adminHash = password_hash('admin', PASSWORD_DEFAULT);
 $t = preg_replace(
     '/^const ADMIN_PASSWORD_HASH = .*$/m',
-    'const ADMIN_PASSWORD_HASH = \'' . addcslashes((string) getenv('ADMIN_HASH'), "'\\") . '\';',
+    'const ADMIN_PASSWORD_HASH = ' . var_export($adminHash, true) . ';',
     $t,
     1
 );
