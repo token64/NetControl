@@ -1,0 +1,2 @@
+# Solo inclusiones PHP internas; no acceso directo por URL
+Require all denied

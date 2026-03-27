@@ -1,4 +1,6 @@
 panel/config.php
+**/netcontrol-credentials.txt
+.deploy/
 
 # Entorno local / editor
 .DS_Store

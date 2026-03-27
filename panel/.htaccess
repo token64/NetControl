@@ -1,0 +1,13 @@
+# NetControl — endurecimiento Apache (requiere AllowOverride All + mod_headers)
+Options -Indexes
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Evitar lectura directa de config por HTTP (los includes PHP siguen funcionando)
+<Files "config.php">
+    Require all denied
+</Files>
