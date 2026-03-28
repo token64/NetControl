@@ -171,7 +171,7 @@ require __DIR__ . '/partials/header.php';
             <div class="progress">
                 <div class="progress-bar bg-danger opacity-90" style="width: <?= $counts['activos'] > 0 ? min(100, (int) round(100 * $vencidosCount / max(1, $counts['activos']))) : 0 ?>%"></div>
             </div>
-            <a class="nc-kpi-link" href="index.php">Ver y gestionar</a>
+            <a class="nc-kpi-link" href="finanzas.php">Ver finanzas / vencidos</a>
         </div>
     </div>
     <div class="col-12 col-md-6 col-xl-3">

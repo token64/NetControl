@@ -37,7 +37,9 @@ $ncIni = nc_initials($ncName);
         <div class="nc-nav-label mt-3">Catálogo</div>
         <a class="nc-snav-link <?= $is('cat-planes') ?>" href="planes.php"><i class="bi bi-speedometer2"></i>Planes</a>
 
-        <div class="nc-nav-label mt-3 text-secondary small fw-normal">Finanzas avanzadas, tickets y tráfico SNMP: en roadmap.</div>
+        <div class="nc-nav-label mt-3">Finanzas</div>
+        <a class="nc-snav-link <?= $is('finanzas') ?>" href="finanzas.php"><i class="bi bi-cash-stack"></i>Cobros y promesas</a>
+        <div class="nc-nav-label mt-2 text-secondary small fw-normal">Tickets y tráfico SNMP: roadmap.</div>
     </nav>
 </aside>
 
@@ -65,6 +67,8 @@ $ncIni = nc_initials($ncName);
             <a class="nc-snav-link" href="redes.php"><i class="bi bi-diagram-3"></i>Redes IPv4</a>
             <div class="nc-nav-label mt-3">Catálogo</div>
             <a class="nc-snav-link" href="planes.php"><i class="bi bi-speedometer2"></i>Planes</a>
+            <div class="nc-nav-label mt-3">Finanzas</div>
+            <a class="nc-snav-link" href="finanzas.php"><i class="bi bi-cash-stack"></i>Cobros y promesas</a>
         </nav>
     </div>
 </div>
