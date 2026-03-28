@@ -20,6 +20,7 @@ if (!is_readable($configPath)) {
 require_once $configPath;
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/registry.php';
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/promesa.php';

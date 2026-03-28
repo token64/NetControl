@@ -1,0 +1,70 @@
+<?php
+declare(strict_types=1);
+/** @var string $navSection */
+$navSection = $navSection ?? '';
+$is = static function (string $s) use ($navSection): string {
+    return $s === $navSection ? 'active' : '';
+};
+$ncName = nc_admin_display_name();
+$ncIni = nc_initials($ncName);
+?>
+<aside class="nc-sidebar nc-sidebar-pro d-none d-lg-flex flex-column sticky-top h-100 align-self-start">
+    <div class="nc-sidebar-profile">
+        <div class="nc-sidebar-profile-inner">
+            <div class="nc-avatar"><?= esc($ncIni) ?></div>
+            <div class="min-w-0">
+                <div class="fw-semibold text-truncate small"><?= esc($ncName) ?></div>
+                <div class="text-secondary" style="font-size: 0.75rem;">Administrador</div>
+            </div>
+        </div>
+    </div>
+    <div class="nc-sidebar-brand-compact px-3 pb-2">
+        <a href="dashboard.php" class="text-decoration-none text-reset fw-bold nc-brand">NetControl</a>
+    </div>
+    <nav class="nc-sidebar-scroll nc-sidebar-nav flex-grow-1">
+        <a class="nc-snav-link <?= $is('dashboard') ?>" href="dashboard.php"><i class="bi bi-grid-1x2-fill"></i>Inicio</a>
+        <a class="nc-snav-link <?= $is('ops-diag') ?>" href="mikrotik_diag.php"><i class="bi bi-hdd-network"></i>Diagnóstico API</a>
+
+        <div class="nc-nav-label mt-2">Clientes</div>
+        <a class="nc-snav-link <?= $is('clientes') ?>" href="index.php"><i class="bi bi-people-fill"></i>Lista de clientes</a>
+        <a class="nc-snav-link <?= $is('clientes-crear') ?>" href="crear.php"><i class="bi bi-person-plus"></i>Nuevo cliente</a>
+        <a class="nc-snav-link <?= $is('clientes-mapa') ?>" href="mapa.php"><i class="bi bi-geo-alt"></i>Mapa</a>
+
+        <div class="nc-nav-label mt-3">Red · MikroTik</div>
+        <a class="nc-snav-link <?= $is('red-routers') ?>" href="routers.php"><i class="bi bi-reception-4"></i>Routers (API)</a>
+        <a class="nc-snav-link <?= $is('red-redes') ?>" href="redes.php"><i class="bi bi-diagram-3"></i>Redes IPv4</a>
+
+        <div class="nc-nav-label mt-3">Catálogo</div>
+        <a class="nc-snav-link <?= $is('cat-planes') ?>" href="planes.php"><i class="bi bi-speedometer2"></i>Planes</a>
+
+        <div class="nc-nav-label mt-3 text-secondary small fw-normal">Finanzas avanzadas, tickets y tráfico SNMP: en roadmap.</div>
+    </nav>
+</aside>
+
+<div class="offcanvas offcanvas-start nc-offcanvas d-lg-none" tabindex="-1" id="ncSideMenu">
+    <div class="offcanvas-header border-bottom border-secondary align-items-start">
+        <div class="d-flex gap-2">
+            <div class="nc-avatar" style="width:40px;height:40px;font-size:0.85rem;"><?= esc($ncIni) ?></div>
+            <div>
+                <div class="fw-semibold small"><?= esc($ncName) ?></div>
+                <div class="text-secondary" style="font-size:0.72rem;">Administrador</div>
+            </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <nav class="nc-sidebar-nav p-3">
+            <a class="nc-snav-link" href="dashboard.php"><i class="bi bi-grid-1x2-fill"></i>Inicio</a>
+            <a class="nc-snav-link" href="mikrotik_diag.php"><i class="bi bi-hdd-network"></i>Diagnóstico</a>
+            <div class="nc-nav-label mt-2">Clientes</div>
+            <a class="nc-snav-link" href="index.php"><i class="bi bi-people-fill"></i>Lista</a>
+            <a class="nc-snav-link" href="crear.php"><i class="bi bi-person-plus"></i>Nuevo</a>
+            <a class="nc-snav-link" href="mapa.php"><i class="bi bi-geo-alt"></i>Mapa</a>
+            <div class="nc-nav-label mt-3">Red</div>
+            <a class="nc-snav-link" href="routers.php"><i class="bi bi-reception-4"></i>Routers</a>
+            <a class="nc-snav-link" href="redes.php"><i class="bi bi-diagram-3"></i>Redes IPv4</a>
+            <div class="nc-nav-label mt-3">Catálogo</div>
+            <a class="nc-snav-link" href="planes.php"><i class="bi bi-speedometer2"></i>Planes</a>
+        </nav>
+    </div>
+</div>

@@ -26,3 +26,23 @@ function formatear_fecha(?string $ymd): string
     $d = DateTimeImmutable::createFromFormat('Y-m-d', $ymd);
     return $d ? $d->format('d/m/Y') : '—';
 }
+
+/** Activo + fecha_pago: vencido | próximo (≤7 días) | vacío. */
+function cliente_etiqueta_vencimiento(?string $fechaPago, string $estado): string
+{
+    if ($estado !== 'activo' || $fechaPago === null || $fechaPago === '') {
+        return '';
+    }
+    $hoy = new DateTimeImmutable('today');
+    $fp = DateTimeImmutable::createFromFormat('Y-m-d', $fechaPago);
+    if (! $fp instanceof DateTimeImmutable) {
+        return '';
+    }
+    if ($fp < $hoy) {
+        return 'vencido';
+    }
+    if ($fp <= $hoy->modify('+7 days')) {
+        return 'proximo';
+    }
+    return '';
+}

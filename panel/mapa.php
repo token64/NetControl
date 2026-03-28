@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 
+$navSection = 'clientes-mapa';
 $pageTitle = 'Mapa — NetControl';
 
 $markers = [];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 
+$navSection = 'clientes';
 $pageTitle = 'Clientes — NetControl';
 require_once __DIR__ . '/funciones.php';
 
@@ -47,17 +48,31 @@ if ($flash): ?>
                     <tr>
                         <td>
                             <strong><?= esc((string) $c['nombre']) ?></strong>
+                            <div class="small text-secondary">#<?= (int) $c['id'] ?>
+                                <?php if (! empty($c['cedula'])): ?> · <?= esc((string) $c['cedula']) ?><?php endif; ?>
+                                <?php if (! empty($c['telefono'])): ?> · <?= esc((string) $c['telefono']) ?><?php endif; ?>
+                            </div>
                             <?php if ($c['tipo_conexion'] === 'pppoe' && $c['usuario']): ?>
-                                <div class="small text-secondary"><?= esc((string) $c['usuario']) ?></div>
+                                <div class="small font-monospace text-secondary"><?= esc((string) $c['usuario']) ?></div>
                             <?php elseif ($c['ip_fija']): ?>
-                                <div class="small text-secondary"><?= esc((string) $c['ip_fija']) ?></div>
+                                <div class="small font-monospace text-secondary"><?= esc((string) $c['ip_fija']) ?></div>
                             <?php endif; ?>
                         </td>
                         <td><span class="badge text-bg-secondary"><?= esc(strtoupper((string) $c['tipo_conexion'])) ?></span></td>
                         <td><?= esc((string) $c['plan']) ?></td>
                         <td><?= esc((string) $c['mikrotik_nombre']) ?></td>
                         <td class="small">
-                            <div>Vence: <strong><?= esc(formatear_fecha($c['fecha_pago'] ? (string) $c['fecha_pago'] : null)) ?></strong></div>
+                            <?php
+                            $ev = cliente_etiqueta_vencimiento($c['fecha_pago'] ? (string) $c['fecha_pago'] : null, (string) $c['estado']);
+                            ?>
+                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                <span>Vence: <strong><?= esc(formatear_fecha($c['fecha_pago'] ? (string) $c['fecha_pago'] : null)) ?></strong></span>
+                                <?php if ($ev === 'vencido'): ?>
+                                    <span class="badge text-bg-danger">Vencido</span>
+                                <?php elseif ($ev === 'proximo'): ?>
+                                    <span class="badge text-bg-warning text-dark">7 días</span>
+                                <?php endif; ?>
+                            </div>
                             <?php if (promesa_vigente($c['promesa_hasta'] ?? null)): ?>
                                 <div class="mt-1"><span class="badge text-bg-info">Promesa <?= esc(formatear_fecha((string) $c['promesa_hasta'])) ?></span></div>
                             <?php elseif (!empty($c['promesa_hasta'])): ?>
@@ -73,6 +88,7 @@ if ($flash): ?>
                         </td>
                         <td class="text-end">
                             <div class="d-inline-flex flex-wrap justify-content-end gap-1">
+                                <a class="btn btn-outline-primary btn-sm" href="cliente_edit.php?id=<?= (int) $c['id'] ?>">Editar</a>
                                 <?php if ($c['estado'] === 'activo'): ?>
                                     <form class="d-inline" method="post" action="cortar.php" onsubmit="return confirm('¿Suspender este cliente?');">
                                         <?= csrf_field() ?>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 
+$navSection = 'clientes';
 $pageTitle = 'Promesa de pago — NetControl';
 
 $id = (int) ($_GET['id'] ?? $_POST['id'] ?? 0);

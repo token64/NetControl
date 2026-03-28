@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 
 if (auth_logged_in()) {
-    redirect('index.php');
+    redirect('dashboard.php');
 }
 
 $error = '';
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (auth_login($user, $pass)) {
             $_SESSION['panel_user'] = ADMIN_USER;
             flash_set('success', 'Bienvenido al panel.');
-            redirect('index.php');
+            redirect('dashboard.php');
         }
         $error = 'Usuario o contraseña incorrectos.';
     }

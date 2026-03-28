@@ -5,10 +5,18 @@ require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 require_once __DIR__ . '/funciones.php';
 
+$navSection = 'clientes-crear';
 $pageTitle = 'Nuevo cliente — NetControl';
 $errors = [];
 $routers = list_mikrotiks();
-$plans = plan_limits();
+$planesRows = list_planes_select();
+if ($planesRows === []) {
+    foreach (nc_plan_limits() as $slug => $lim) {
+        $planesRows[] = ['slug' => $slug, 'nombre' => $slug, 'max_limit' => $lim];
+    }
+}
+$redesActivas = list_redes_activas();
+$planLimits = nc_plan_limits();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (! csrf_verify()) {
@@ -25,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $plan       = (string) ($_POST['plan'] ?? '');
         $user       = trim((string) ($_POST['user'] ?? ''));
         $pass       = (string) ($_POST['pass'] ?? '');
+        $redId      = (int) ($_POST['red_id'] ?? 0);
 
         $lat = $latRaw === '' ? null : $latRaw;
         $lon = $lonRaw === '' ? null : $lonRaw;
@@ -35,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($mikrotikId <= 0) {
             $errors[] = 'Selecciona un MikroTik.';
         }
-        if (! isset($plans[$plan])) {
-            $errors[] = 'Plan no válido.';
+        if (! isset($planLimits[$plan])) {
+            $errors[] = 'Plan no válido o inactivo.';
         }
         if ($tipo !== 'pppoe' && $tipo !== 'ip') {
             $errors[] = 'Tipo de conexión no válido.';
@@ -44,6 +53,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($tipo === 'pppoe') {
             if ($user === '' || $pass === '') {
                 $errors[] = 'PPPoE requiere usuario y contraseña.';
+            }
+        }
+
+        $pool = IP_POOL_DEFAULT;
+        if ($tipo === 'ip') {
+            if ($redId > 0) {
+                $redRow = red_by_id($redId);
+                if (! $redRow || empty($redRow['activo'])) {
+                    $errors[] = 'La red IPv4 elegida no existe o está inactiva.';
+                } elseif ((int) $redRow['mikrotik_id'] !== $mikrotikId) {
+                    $errors[] = 'La red debe pertenecer al mismo router seleccionado.';
+                } else {
+                    $pool = (string) $redRow['rango'];
+                }
             }
         }
 
@@ -57,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $passwordDb = $pass;
             }
 
-            $limits = $plans[$plan];
+            $limits = $planLimits[$plan];
             $fechaPago = (new DateTimeImmutable('today'))->modify('+30 days')->format('Y-m-d');
 
             $db = db();
@@ -97,10 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'comment'  => 'NetControl-' . $newId,
                         ]);
                     } else {
-                        $pool = IP_POOL_DEFAULT;
                         $ipAssign = ip_libre($mikrotikId, $pool);
                         if ($ipAssign === null) {
-                            throw new RuntimeException('No hay IPs libres en el pool configurado.');
+                            throw new RuntimeException('No hay IPs libres en el rango seleccionado.');
                         }
                         $API->comm('/queue/simple/add', [
                             'name'      => 'nc-' . $newId,
@@ -127,6 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$defaultPlan = $planesRows[0]['slug'] ?? 'plan_10m';
+
 require __DIR__ . '/partials/header.php';
 ?>
 
@@ -143,7 +167,7 @@ require __DIR__ . '/partials/header.php';
 <?php endif; ?>
 
 <?php if ($routers === []): ?>
-    <div class="alert alert-warning nc-flash">No hay routers en la base de datos. Importa <code>sql/schema.sql</code> y configura la tabla <code>mikrotiks</code>.</div>
+    <div class="alert alert-warning nc-flash">No hay routers en la base de datos. <a href="router_edit.php">Dar de alta un router</a> o importá <code>sql/schema.sql</code>.</div>
 <?php endif; ?>
 
 <div class="row">
@@ -188,13 +212,25 @@ require __DIR__ . '/partials/header.php';
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">MikroTik</label>
-                        <select class="form-select" name="mikrotik" required>
+                        <select class="form-select" name="mikrotik" id="mikrotik" required>
                             <?php foreach ($routers as $r): ?>
                                 <option value="<?= (int) $r['id'] ?>" <?= (string) (int) ($_POST['mikrotik'] ?? 0) === (string) (int) $r['id'] ? 'selected' : '' ?>>
                                     <?= esc((string) $r['nombre']) ?> (<?= esc((string) $r['ip']) ?>)
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                    </div>
+                    <div class="col-md-6 ip-only d-none">
+                        <label class="form-label">Red IPv4 (pool)</label>
+                        <select class="form-select" name="red_id" id="red_id">
+                            <option value="0" data-mikrotik="">Predeterminado (<?= esc(IP_POOL_DEFAULT) ?>)</option>
+                            <?php foreach ($redesActivas as $net): ?>
+                                <option value="<?= (int) $net['id'] ?>" data-mikrotik="<?= (int) $net['mikrotik_id'] ?>">
+                                    <?= esc((string) $net['nombre']) ?> — <?= esc((string) $net['rango']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="small text-secondary mb-0 mt-1">Gestioná rangos en <a href="redes.php">Redes IPv4</a>.</p>
                     </div>
                     <div class="col-md-6 pppoe-only">
                         <label class="form-label">Usuario PPPoE</label>
@@ -207,10 +243,17 @@ require __DIR__ . '/partials/header.php';
                     <div class="col-md-6">
                         <label class="form-label">Plan (perfil / cola)</label>
                         <select class="form-select" name="plan">
-                            <?php foreach ($plans as $k => $label): ?>
-                                <option value="<?= esc($k) ?>" <?= ($_POST['plan'] ?? 'plan_10m') === $k ? 'selected' : '' ?>><?= esc($k . ' — ' . $label) ?></option>
+                            <?php foreach ($planesRows as $p): ?>
+                                <?php
+                                $slug = (string) $p['slug'];
+                                $postPlan = (string) ($_POST['plan'] ?? $defaultPlan);
+                                ?>
+                                <option value="<?= esc($slug) ?>" <?= $postPlan === $slug ? 'selected' : '' ?>>
+                                    <?= esc((string) $p['nombre']) ?> (<?= esc($slug) ?>) — <?= esc((string) $p['max_limit']) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
+                        <p class="small text-secondary mb-0 mt-1">Editá catálogo en <a href="planes.php">Planes</a>.</p>
                     </div>
                 </div>
                 <div class="mt-4 d-flex gap-2">
@@ -225,13 +268,42 @@ require __DIR__ . '/partials/header.php';
 <script>
 (function () {
   const tipo = document.getElementById('tipo');
+  const mik = document.getElementById('mikrotik');
+  const red = document.getElementById('red_id');
   const ppp = document.querySelectorAll('.pppoe-only');
-  function sync() {
-    const on = tipo.value === 'pppoe';
-    ppp.forEach(function (el) { el.classList.toggle('d-none', !on); });
+  const ipOnly = document.querySelectorAll('.ip-only');
+
+  function syncTipo() {
+    const isPpp = tipo.value === 'pppoe';
+    ppp.forEach(function (el) { el.classList.toggle('d-none', !isPpp); });
+    ipOnly.forEach(function (el) { el.classList.toggle('d-none', isPpp); });
+    filterRedes();
   }
-  tipo.addEventListener('change', sync);
-  sync();
+
+  function filterRedes() {
+    if (!red || !mik) return;
+    const mid = mik.value;
+    let firstVisible = null;
+    Array.prototype.forEach.call(red.options, function (opt) {
+      const om = opt.getAttribute('data-mikrotik');
+      if (opt.value === '0') {
+        opt.hidden = false;
+        firstVisible = opt;
+        return;
+      }
+      const show = om === mid;
+      opt.hidden = !show;
+      if (show && firstVisible === null) firstVisible = opt;
+    });
+    if (red.selectedOptions.length && red.selectedOptions[0].hidden) {
+      red.value = firstVisible ? firstVisible.value : '0';
+    }
+  }
+
+  tipo.addEventListener('change', syncTipo);
+  mik.addEventListener('change', filterRedes);
+  syncTipo();
+
   document.getElementById('btnGeo').addEventListener('click', function () {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(function (pos) {
