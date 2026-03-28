@@ -9,6 +9,7 @@
   --nc-muted: #8799ae;
   --nc-danger: #f87171;
   --nc-warning: #f5c26b;
+  --nc-font-comic: "Comic Neue", "Comic Sans MS", "Chalkboard SE", cursive;
 }
 
 .nc-body {
@@ -24,8 +25,36 @@
 }
 
 .nc-brand {
-  letter-spacing: 0.04em;
+  font-family: var(--nc-font-comic);
+  font-weight: 700;
+  letter-spacing: 0.02em;
   color: var(--nc-accent) !important;
+}
+
+/* Tipografía “cómic” en cabeceras de producto (cuerpo sigue sans legible) */
+.nc-welcome,
+.nc-sidebar-profile .fw-semibold,
+.nc-kpi-card .nc-kpi-label,
+.nc-kpi-card .nc-kpi-value,
+.nc-dash-widget-h,
+.nc-nav-label,
+.nc-main-inner h1,
+.nc-main-inner h2,
+.nc-main-inner h3,
+.nc-main-inner .h1,
+.nc-main-inner .h2,
+.nc-main-inner .h3,
+.nc-main-inner .h4,
+.nc-main-inner h4 {
+  font-family: var(--nc-font-comic);
+}
+
+.nc-kpi-card .nc-kpi-label {
+  letter-spacing: 0.04em;
+}
+
+.nc-kpi-card .nc-kpi-value {
+  font-weight: 700;
 }
 
 .nc-card {
