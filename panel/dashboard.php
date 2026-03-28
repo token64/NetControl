@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 require_once __DIR__ . '/funciones.php';
+require_once __DIR__ . '/includes/nc_build.php';
 
 $navSection = 'dashboard';
 $pageTitle = 'Inicio — NetControl';
@@ -131,7 +132,7 @@ require __DIR__ . '/partials/header.php';
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
     <div>
         <h1 class="h4 mb-1">Panel operador</h1>
-        <p class="text-secondary small mb-0">Resumen operativo: clientes, cobros en ventana, vencidos y routers.</p>
+        <p class="text-secondary small mb-0">Resumen operativo: clientes, cobros en ventana, vencidos y routers. <span class="opacity-75">· UI rev <?= (int) NC_PANEL_UI_REV ?></span></p>
     </div>
     <div class="d-flex flex-wrap gap-2">
         <a class="btn btn-nc-primary btn-sm" href="crear.php"><i class="bi bi-person-plus me-1"></i>Nuevo cliente</a>
