@@ -6,6 +6,7 @@ require_auth();
 require_once __DIR__ . '/funciones.php';
 
 $navSection = 'finanzas';
+$finanzasSub = 'cobros';
 $pageTitle = 'Finanzas — NetControl';
 $flash = flash_get();
 
