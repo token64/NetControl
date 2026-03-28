@@ -28,4 +28,11 @@ Contenedor NetControl (panel WISP, este repo)
 - Si git pull choca con cambios locales: deploy/reset-to-origin-main.sh (hace backup de config.php)
 - Sin git: deploy/download-panel-from-github.sh
 
+Actualizar código del CT sin SSH al .73
+------------------------------
+PVE 9.x no permite "ejecutar bash dentro del LXC" por la API HTTP. Opciones:
+- Consola web: Nodo proxmox -> Shell -> pegar el comando que genera:
+    deploy\pve-sync-netcontrol.ps1   (usa tu proxmox.credentials.json y encuentra vmid por IP)
+- O SSH al hipervisor (.215) y el mismo "pct exec <vmid> -- bash -lc '...'"
+
 Nota: Las IPs pueden cambiar; ajustá según tu red.
