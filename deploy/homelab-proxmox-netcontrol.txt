@@ -28,6 +28,10 @@ Contenedor NetControl (panel WISP, este repo)
 - Si git pull choca con cambios locales: deploy/reset-to-origin-main.sh (hace backup de config.php)
 - Sin git: deploy/download-panel-from-github.sh
 
+Migraciones SQL adicionales (ej. finanzas)
+------------------------------------------
+- sql/migration_finanzas_pagos.sql — tabla `pagos` (registrar cobros / transacciones).
+
 Actualizar código del CT sin SSH al .73
 ------------------------------
 PVE 9.x no permite "ejecutar bash dentro del LXC" por la API HTTP. Opciones:

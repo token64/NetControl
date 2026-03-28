@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 require_once __DIR__ . '/funciones.php';
+require_once __DIR__ . '/includes/finanzas.php';
 
 $navSection = 'finanzas';
 $finanzasSub = 'cobros';
@@ -66,6 +67,8 @@ if ($res) {
     }
 }
 
+$pagosRecientes = nc_pagos_recientes(12);
+
 require __DIR__ . '/partials/header.php';
 ?>
 
@@ -81,8 +84,18 @@ require __DIR__ . '/partials/header.php';
         <h1 class="h4 mb-1">Finanzas</h1>
         <p class="text-secondary small mb-0">Cobros según fechas de pago y promesas en el sistema. Facturación y montos en moneda: pendiente (sin tablas de cobros aún).</p>
     </div>
-    <a class="btn btn-outline-secondary btn-sm" href="dashboard.php">Volver al inicio</a>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-nc-primary btn-sm" href="finanzas_registrar_pago.php">Registrar pago</a>
+        <a class="btn btn-outline-secondary btn-sm" href="finanzas_transacciones.php">Transacciones</a>
+        <a class="btn btn-outline-secondary btn-sm" href="dashboard.php">Inicio</a>
+    </div>
 </div>
+
+<?php if (! nc_pagos_table_exists()): ?>
+    <div class="alert alert-warning nc-flash small">
+        Para registrar cobros en historial, ejecutá en MySQL: <code>sql/migration_finanzas_pagos.sql</code>
+    </div>
+<?php endif; ?>
 
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
@@ -213,8 +226,39 @@ require __DIR__ . '/partials/header.php';
     </div>
 </div>
 
+<?php if (nc_pagos_table_exists() && $pagosRecientes !== []): ?>
+    <div class="nc-dash-widget mt-4">
+        <div class="nc-dash-widget-h d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span>Últimos cobros registrados</span>
+            <a class="small text-decoration-none link-secondary" href="finanzas_transacciones.php">Ver todas</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-borderless nc-mini-table nc-table mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-3">Fecha</th>
+                        <th>Cliente</th>
+                        <th class="text-end">Monto</th>
+                        <th class="pe-3">Método</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($pagosRecientes as $pr): ?>
+                        <tr>
+                            <td class="ps-3 small text-secondary"><?= esc(substr((string) $pr['creado_en'], 0, 16)) ?></td>
+                            <td><?= esc((string) $pr['cliente_nombre']) ?></td>
+                            <td class="text-end font-monospace"><?= esc((string) $pr['moneda']) ?> <?= esc(number_format((float) $pr['monto'], 2, '.', ',')) ?></td>
+                            <td class="pe-3 small"><?= esc((string) $pr['metodo']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php endif; ?>
+
 <div class="alert alert-secondary border-secondary mt-4 mb-0 small">
-    <strong>Roadmap:</strong> facturas, montos (RD$ / USD), historial de cobros por operador e integración contable requieren nuevas tablas y pantallas; hoy el panel usa solo <code>fecha_pago</code> y <code>promesa_hasta</code> en clientes.
+    <strong>Camino hacia otros ISP:</strong> ya hay tabla <code>pagos</code> + registrar cobro + transacciones. Siguientes fases: <strong>facturas</strong> (NCF, líneas, saldos), <strong>pagos masivos</strong> (CSV), <strong>ingresos/egresos</strong>, <strong>portal cliente</strong>, <strong>e‑CF / DGII</strong>, <strong>estadísticas</strong> avanzadas.
 </div>
 
 <?php require __DIR__ . '/partials/footer.php';

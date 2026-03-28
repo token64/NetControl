@@ -3,23 +3,24 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
+require_once __DIR__ . '/includes/helpers.php';
+
+$p = (string) ($_GET['p'] ?? '');
+if ($p === 'registrar-pago') {
+    redirect('finanzas_registrar_pago.php');
+}
+if ($p === 'transacciones') {
+    redirect('finanzas_transacciones.php');
+}
 
 $pages = [
     'facturas' => [
         'title' => 'Facturas',
         'body' => 'Emisión, numeración, estados (pagada / vencida) e impresión. Requiere tablas de facturas y líneas vinculadas a clientes.',
     ],
-    'registrar-pago' => [
-        'title' => 'Registrar pago',
-        'body' => 'Registrar cobro puntual y actualizar saldo / fecha de pago del cliente. Requiere tabla de movimientos o integración con facturas.',
-    ],
     'pagos-masivos' => [
         'title' => 'Registrar pagos masivos',
         'body' => 'Importación CSV o carga en lote de pagos. Requiere el módulo de pagos y validaciones.',
-    ],
-    'transacciones' => [
-        'title' => 'Transacciones',
-        'body' => 'Historial filtrable por fecha, cliente y operador. Requiere registro de cada cobro en base de datos.',
     ],
     'ingresos-egresos' => [
         'title' => 'Otros ingresos y egresos',
@@ -40,9 +41,7 @@ $pages = [
     ],
 ];
 
-$p = (string) ($_GET['p'] ?? '');
 if ($p === '' || ! isset($pages[$p])) {
-    require_once __DIR__ . '/includes/helpers.php';
     redirect('finanzas.php');
 }
 

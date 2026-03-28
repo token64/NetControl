@@ -13,9 +13,9 @@ $__finOpen = ($navSection ?? '') === 'finanzas';
 $__finLinks = [
     ['cobros', 'finanzas.php', 'bi-cash-stack', 'Cobros y promesas'],
     ['facturas', 'finanzas_place.php?p=facturas', 'bi-receipt', 'Facturas'],
-    ['registrar-pago', 'finanzas_place.php?p=registrar-pago', 'bi-plus-circle', 'Registrar pago'],
+    ['registrar-pago', 'finanzas_registrar_pago.php', 'bi-plus-circle', 'Registrar pago'],
     ['pagos-masivos', 'finanzas_place.php?p=pagos-masivos', 'bi-upload', 'Registrar pagos masivos'],
-    ['transacciones', 'finanzas_place.php?p=transacciones', 'bi-arrow-left-right', 'Transacciones'],
+    ['transacciones', 'finanzas_transacciones.php', 'bi-arrow-left-right', 'Transacciones'],
     ['ingresos-egresos', 'finanzas_place.php?p=ingresos-egresos', 'bi-graph-up-arrow', 'Otros ingresos y egresos'],
     ['reportes-pago', 'finanzas_place.php?p=reportes-pago', 'bi-person-badge', 'Reportes de pago (portal cliente)'],
     ['facturacion-electronica', 'finanzas_place.php?p=facturacion-electronica', 'bi-file-earmark-pdf', 'Facturación electrónica'],

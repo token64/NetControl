@@ -81,6 +81,23 @@ CREATE TABLE IF NOT EXISTS clientes (
     ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS pagos (
+  id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  cliente_id       INT UNSIGNED NOT NULL,
+  monto            DECIMAL(12,2) NOT NULL,
+  moneda           CHAR(3) NOT NULL DEFAULT 'DOP',
+  metodo           VARCHAR(40) NOT NULL DEFAULT 'efectivo',
+  referencia       VARCHAR(120) DEFAULT NULL,
+  notas            VARCHAR(500) DEFAULT NULL,
+  operador         VARCHAR(80) NOT NULL DEFAULT '',
+  creado_en        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_pagos_cliente_creado (cliente_id, creado_en),
+  CONSTRAINT fk_pagos_cliente
+    FOREIGN KEY (cliente_id) REFERENCES clientes (id)
+    ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
 -- MikroTik de ejemplo (ejecutar una sola vez o ajustar IP/usuario/clave)
 INSERT INTO mikrotiks (nombre, ip, api_port, use_ssl, usuario, password)
 SELECT 'Principal', '192.168.88.1', 8728, 0, 'admin', 'CAMBIAR_PASSWORD'

@@ -5,6 +5,7 @@ require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 require_once __DIR__ . '/funciones.php';
 require_once __DIR__ . '/includes/nc_build.php';
+require_once __DIR__ . '/includes/finanzas.php';
 
 $navSection = 'dashboard';
 $pageTitle = 'Inicio — NetControl';
@@ -119,6 +120,8 @@ $kpiPctRouters = $routersTotal > 0
     ? (int) round(100 * $routersOk / $routersTotal)
     : 0;
 
+$cobradoHoy = nc_pagos_total_hoy();
+
 require __DIR__ . '/partials/header.php';
 ?>
 
@@ -157,10 +160,11 @@ require __DIR__ . '/partials/header.php';
             <div class="nc-kpi-label">Ventana de cobro (7 días)</div>
             <div class="nc-kpi-value"><?= $proximos7Count ?></div>
             <div class="nc-kpi-meta">Pagos programados en la próxima semana · Promesas vigentes: <?= $promesasActivas ?></div>
+            <div class="nc-kpi-meta mt-1" style="font-size:0.78rem;">Cobrado hoy (registrado): <strong><?= esc(number_format($cobradoHoy, 2, '.', ',')) ?></strong> total monedas mezcladas</div>
             <div class="progress">
                 <div class="progress-bar bg-white opacity-75" style="width: <?= $counts['activos'] > 0 ? min(100, (int) round(100 * $proximos7Count / max(1, $counts['activos']))) : 0 ?>%"></div>
             </div>
-            <a class="nc-kpi-link" href="index.php">Ver calendario en listado</a>
+            <a class="nc-kpi-link" href="finanzas_transacciones.php">Ver transacciones</a>
         </div>
     </div>
     <div class="col-12 col-md-6 col-xl-3">

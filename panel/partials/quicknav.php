@@ -14,6 +14,8 @@ $qn = static function (string $s) use ($navSection): string {
         <span class="nc-qnav-sep text-secondary d-none d-md-inline">·</span>
         <a class="<?= $qn('finanzas') ?>" href="finanzas.php">Finanzas</a>
         <span class="nc-qnav-sep text-secondary d-none d-md-inline">·</span>
+        <a class="<?= $qn('finanzas') ?>" href="finanzas_transacciones.php">Cobros</a>
+        <span class="nc-qnav-sep text-secondary d-none d-md-inline">·</span>
         <a class="<?= $qn('ops-diag') ?>" href="mikrotik_diag.php">API</a>
         <span class="nc-qnav-sep text-secondary d-none d-md-inline">·</span>
         <a class="<?= $qn('clientes-crear') ?>" href="crear.php">Nuevo cliente</a>
