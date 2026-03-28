@@ -2,6 +2,7 @@
 # NetControl — Debian LXC: Apache + PHP + MariaDB + clon desde GitHub.
 # Primera instalación: crea DB, usuario MySQL, config.php, Apache.
 # Re-ejecución: solo actualiza sistema + git pull (no toca config.php ni borra credenciales).
+# Homelab Proxmox + MCP (referencia): deploy/homelab-proxmox-netcontrol.txt
 # Uso (root en el CT): bash lxc-bootstrap.sh
 # Con red (si no hay curl): apt-get update && apt-get install -y curl
 #   curl -fsSL https://raw.githubusercontent.com/token64/NetControl/main/deploy/lxc-bootstrap.sh | bash

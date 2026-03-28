@@ -1,0 +1,46 @@
+---
+description: Proxmox VE (homelab) — credenciales locales, MCP(s) y tareas habituales
+alwaysApply: true
+---
+
+# Proxmox VE en este entorno
+
+## Dónde está la verdad (no pedir al usuario que lo repita)
+
+- **API / red:** `https://192.168.13.215:8006` — PVE 8.x, nodo suele llamarse `proxmox`.
+- **Token API (ID):** `root@pam!cursor-mcp` (usuario `root@pam`, token `cursor-mcp`, comentario “conexión con cursor”). El **secreto** no se escribe en el chat; vive solo en archivos locales (ver MCP abajo) y debe alinearse al rotar el token en PVE.
+
+## MCP en Cursor (dos formas válidas; usá una)
+
+### A) `stdio` — `npx @bldg-7/proxmox-mcp`
+
+En `C:\Users\txtrd\.cursor\mcp.json`: `command` / `args` + `env` con `PROXMOX_HOST`, `PROXMOX_PORT`, `PROXMOX_USER`, `PROXMOX_TOKEN_NAME`, `PROXMOX_TOKEN_VALUE`, `NODE_ENV=production`, `PROXMOX_SSL_MODE=insecure`, `PROXMOX_ALLOW_ELEVATED=true` (crear/editar invitados).
+
+Mantener alineado con `C:\Users\txtrd\.cursor\proxmox.credentials.json` (`auth.token_value`) si rotás el token.
+
+### B) SSE — bridge local en **8811** (docs `/docs`)
+
+- Levantar: `C:\Users\txtrd\ProxmoxMCP-Plus-Official\start_server.ps1` (Uvicorn en `0.0.0.0:8811`).
+- Cursor: en `mcp.json` entr **`type` + `url`** → `http://127.0.0.1:8811/sse` (no hace falta pegar el token en `mcp.json`; el bridge lee `proxmox-config\config.json` del repo Plus).
+
+**Docs / salud:** `http://localhost:8811/docs`, `http://127.0.0.1:8811/health`.
+
+Si Cursor no ve herramientas: comprobar que el proceso 8811 está arriba y reiniciar MCP / Cursor tras cambiar `mcp.json`.
+
+## NetControl (panel web WISP) — no confundir con la API de PVE
+
+- Es el proyecto PHP de este repo: corre **dentro de un CT** (contenedor), no en el nodo Proxmox.
+- En homelab típico el CT tiene IP **192.168.13.73** y el panel abre en **`http://<IP-CT>/netcontrol/`** (Apache con `Alias /netcontrol` → `/var/www/NetControl/panel`).
+- Código en el CT: **`/var/www/NetControl`**. Actualizar con `git pull` / scripts en `deploy/` (ver `deploy/homelab-proxmox-netcontrol.txt`).
+- La **API de Proxmox** (`:8006`) sirve para operar el hipervisor; el **panel NetControl** usa PHP + MySQL + MikroTik — son capas distintas.
+
+## Qué hacer cuando el usuario pida Proxmox
+
+1. Comprobar MCP activo (stdio o 8811 según lo configurado); si falla: red hasta `192.168.13.215:8006`, token y modo MCP.
+2. **Listar** VMs y CT: herramientas del MCP que liste Cursor (invitados/nodos/cluster) — no inventar URLs de API de PVE.
+3. **Crear** VM o CT: herramientas elevadas; pedir solo lo imprescindible (VMID, plantilla/ISO, CPU/RAM/disco, bridge, nodo).
+4. **Operar** (arrancar, consola, etc.): según permisos del token; 403 / “Privilege Separation” → ACLs o rol en PVE.
+
+## Privacidad
+
+- No volcar el valor del token en respuestas ni en reglas; rotación en PVE si se filtra.

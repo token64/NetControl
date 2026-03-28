@@ -7,4 +7,6 @@ panel/config.php
 Thumbs.db
 *.log
 .idea/
-.cursor/
+# Cursor: ignorar todo el directorio salvo reglas versionadas
+.cursor/*
+!.cursor/rules/

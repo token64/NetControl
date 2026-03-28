@@ -1,0 +1,31 @@
+NetControl + Proxmox (homelab) — referencia rápida
+==================================================
+Última alineación con la regla .cursor/rules/proxmox-ve-mcp.mdc
+
+Proxmox VE (hipervisor)
+-----------------------
+- API HTTPS: https://192.168.13.215:8006
+- Nodo habitual: proxmox
+- Token API (solo el ID público): root@pam!cursor-mcp
+  El SECRETO del token NO va en este archivo. Está en tu PC en:
+  - Cursor: según modo MCP (ver regla proxmox-ve-mcp.mdc)
+  - Opcional: C:\Users\<usuario>\.cursor\proxmox.credentials.json
+
+MCP en Cursor (elegir uno)
+---------------------------
+A) stdio: npx @bldg-7/proxmox-mcp + variables en .cursor/mcp.json
+B) SSE: levantar ProxmoxMCP-Plus-Official (puerto 8811) + url http://127.0.0.1:8811/sse en mcp.json
+   Docs: http://localhost:8811/docs  |  Salud: http://127.0.0.1:8811/health
+
+Contenedor NetControl (panel WISP, este repo)
+---------------------------------------------
+- IP ejemplo en esta red: 192.168.13.73
+- Panel web: http://<IP-CT>/netcontrol/
+- Comprobar versión del panel: http://<IP-CT>/netcontrol/nc_version.php (esperado nc_panel_ui_rev=2)
+- Ruta en el CT: /var/www/NetControl
+- Instalar / actualizar sistema CT: deploy/lxc-bootstrap.sh
+- Actualizar solo código (git ok): deploy/server-git-pull.sh
+- Si git pull choca con cambios locales: deploy/reset-to-origin-main.sh (hace backup de config.php)
+- Sin git: deploy/download-panel-from-github.sh
+
+Nota: Las IPs pueden cambiar; ajustá según tu red.
