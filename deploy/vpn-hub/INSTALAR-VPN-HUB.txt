@@ -69,6 +69,11 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
    - Abrí en el navegador (reemplazá por la IP LAN real de la VM):
      http://IP_DE_LA_VM/vpn-panel/
    - La primera vez: entrá con la contraseña de config.php. NO publiques el panel a Internet sin HTTPS y sin endurecer acceso.
+   - Si el login dice «Contraseña incorrecta»: la cadena debe coincidir al pie de la letra con
+     NC_VPN_PANEL_PASSWORD en config.php (incluye mayúsculas; espacios al pegar pueden fallar).
+     Para ver qué valor usa PHP: php -r "require '/var/www/html/vpn-panel/config.php'; echo NC_VPN_PANEL_PASSWORD, PHP_EOL;"
+   - Para traer cambios del panel desde Git (ej. después de git pull en ~/NetControl):
+     sudo cp ~/NetControl/deploy/vpn-hub/web-panel/index.php /var/www/html/vpn-panel/index.php
 
 Nota: Si ya tenés otra VPN (p. ej. la del proveedor con OpenVPN tcp 1194), mantené cada túnel con su red; este hub NetControl usa 10.64.0.0/24 aparte.
    Si necesitás OpenVPN tcp por compatibilidad exacta, armá servidor OVPN aparte o pedí script dedicado.
