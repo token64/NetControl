@@ -32,7 +32,7 @@ VPN hub (VM 110 «vpn-hub» en Proxmox) — WireGuard
 8) NetControl
    Routers → IP/host = 10.64.0.16 (o la que usó el MK) + usuario/contraseña API.
 
-Nota: MikroWisp suele usar otra red VPN (a menudo 10.8.0.x con OpenVPN tcp 1194). Este hub NetControl usa 10.64.0.0/24 para no chocar con ese rango.
+Nota: Si ya tenés otra VPN (p. ej. la del proveedor con OpenVPN tcp 1194), mantené cada túnel con su red; este hub NetControl usa 10.64.0.0/24 aparte.
    Si necesitás OpenVPN tcp por compatibilidad exacta, armá servidor OVPN aparte o pedí script dedicado.
 
 Archivos

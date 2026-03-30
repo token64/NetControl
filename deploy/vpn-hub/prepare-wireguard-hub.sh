@@ -1,5 +1,5 @@
 #!/bin/bash
-# NetControl — preparar VM Ubuntu como hub WireGuard (red 10.64.0.0/24, distinta a MikroWisp 10.8.0.x).
+# NetControl — preparar VM Ubuntu como hub WireGuard (red 10.64.0.0/24; no reutilizar rangos de otras VPN).
 # Ejecutar EN la VM vpn-hub tras instalar Ubuntu Server:
 #   sudo bash prepare-wireguard-hub.sh
 set -euo pipefail

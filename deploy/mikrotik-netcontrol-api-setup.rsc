@@ -4,8 +4,7 @@
 #
 # ANTES: editá en los bloques :local … los valores reales:
 #   panelIp = IP desde la cual el MikroTik VE al servidor NetControl
-#             (LAN del panel, o IP del servidor en la VPN — MikroWisp suele usar 10.8.0.x;
-#              hub WireGuard de este repo: 10.64.0.0/24, ej. 10.64.0.16 en NetControl)
+#             (LAN del panel, o IP del MK en la VPN que use el panel — hub WireGuard del repo: 10.64.0.x)
 #   apiUser / apiPass = mismo usuario/clave que cargás en NetControl → Routers
 # =============================================================================
 
