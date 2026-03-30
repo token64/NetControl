@@ -38,6 +38,35 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
 8) NetControl
    Routers → IP/host = 10.64.0.16 (o la que usó el MK) + usuario/contraseña API.
 
+9) Panel web PHP (alta de peers desde el navegador)
+   Carpeta en el repo: deploy/vpn-hub/web-panel/
+   - Instalá Apache y PHP (en la VM hub):
+     sudo apt update && sudo apt install -y apache2 libapache2-mod-php php
+   - Copiá la carpeta web-panel al servidor web (ej. desde tu PC, ajustá usuario e IP LAN de la VM):
+     scp -r deploy\vpn-hub\web-panel usuario@IP_VM:/tmp/web-panel
+     ssh usuario@IP_VM
+     sudo rm -rf /var/www/html/vpn-panel && sudo mv /tmp/web-panel /var/www/html/vpn-panel
+     sudo chown -R root:www-data /var/www/html/vpn-panel
+     sudo chmod 640 /var/www/html/vpn-panel/config.php 2>/dev/null; true
+   - Configuración:
+     sudo cp /var/www/html/vpn-panel/config.example.php /var/www/html/vpn-panel/config.php
+     sudo nano /var/www/html/vpn-panel/config.php
+       · NC_VPN_PANEL_PASSWORD = contraseña larga
+       · WG_ADD_PEER_SCRIPT = ruta absoluta a wg-server-add-peer.sh (ej. /home/jose/vpn-hub/wg-server-add-peer.sh)
+   - Sudo solo para el script y wg show (ajustá la ruta del .sh):
+     sudo install -m 440 /dev/null /etc/sudoers.d/nc-vpn-panel
+     sudo nano /etc/sudoers.d/nc-vpn-panel
+       www-data ALL=(root) NOPASSWD: /bin/bash /home/jose/vpn-hub/wg-server-add-peer.sh
+       www-data ALL=(root) NOPASSWD: /usr/bin/wg show wg0
+     (Si wg está en otra ruta: which wg)
+   - Si usás UFW y querés HTTP desde la LAN:
+     sudo ufw allow from 192.168.13.0/24 to any port 80 proto tcp
+     (Ajustá el /24 a tu red; en producción conviene HTTPS y restricción por IP.)
+   - Reiniciá Apache: sudo systemctl reload apache2
+   - Abrí en el navegador (reemplazá por la IP LAN real de la VM):
+     http://IP_DE_LA_VM/vpn-panel/
+   - La primera vez: entrá con la contraseña de config.php. NO publiques el panel a Internet sin HTTPS y sin endurecer acceso.
+
 Nota: Si ya tenés otra VPN (p. ej. la del proveedor con OpenVPN tcp 1194), mantené cada túnel con su red; este hub NetControl usa 10.64.0.0/24 aparte.
    Si necesitás OpenVPN tcp por compatibilidad exacta, armá servidor OVPN aparte o pedí script dedicado.
 
@@ -45,4 +74,5 @@ Archivos
 --------
 - prepare-wireguard-hub.sh  — instalación hub
 - wg-server-add-peer.sh     — alta de cada MikroTik / cliente
+- web-panel/                — panel PHP (nombre, descripción, clave pública, IP túnel)
 - MIKROTIK-BORDE.txt        — NAT 51820, DHCP, ruta 10.64.0.0/24 en el router central

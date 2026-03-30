@@ -20,7 +20,7 @@ B) SSE: levantar ProxmoxMCP-Plus-Official (puerto 8811) + url http://127.0.0.1:8
 Contenedor NetControl (panel WISP, este repo)
 ---------------------------------------------
 - IP ejemplo en esta red: 192.168.13.73 (CT); VM 109 «NetControls»: 192.168.13.50
-- VM 110 «vpn-hub» (Proxmox): hub VPN WireGuard; deploy/vpn-hub/ (INSTALAR-VPN-HUB.txt, MIKROTIK-BORDE.txt). En el panel: ayuda Routers / #ayuda-enlaces-mikrotik.
+- VM 110 «vpn-hub» (Proxmox): hub VPN WireGuard; deploy/vpn-hub/ (INSTALAR-VPN-HUB.txt, MIKROTIK-BORDE.txt). En el panel: ayuda Routers / #ayuda-enlaces-mikrotik. IP LAN de ejemplo en este lab: 192.168.13.45 (DHCP; verificar con `arp` o consola si cambió).
 - Panel web: http://<IP-CT-o-VM>/netcontrol/
 - Comprobar versión del panel: http://<IP-CT>/netcontrol/nc_version.php (esperado nc_panel_ui_rev=2)
 - Ruta en el CT: /var/www/NetControl
