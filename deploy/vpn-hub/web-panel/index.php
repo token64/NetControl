@@ -57,7 +57,7 @@ if (isset($_GET['logout'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
-    $pw = (string) ($_POST['password'] ?? '');
+    $pw = trim((string) ($_POST['password'] ?? ''));
     if (hash_equals(NC_VPN_PANEL_PASSWORD, $pw)) {
         $_SESSION['nc_vpn_panel'] = 1;
         header('Location: ./');
