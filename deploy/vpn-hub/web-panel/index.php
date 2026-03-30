@@ -169,6 +169,11 @@ header('Content-Type: text/html; charset=utf-8');
         .err { color: var(--err); margin: .75rem 0; font-size: .9rem; }
         pre { background: #0a0e12; padding: 1rem; border-radius: 8px; overflow: auto; font-size: .78rem; white-space: pre-wrap; word-break: break-all; border: 1px solid #2a3544; }
         .warn { background: rgba(246,160,160,.12); border: 1px solid rgba(246,160,160,.35); padding: .75rem; border-radius: 8px; font-size: .85rem; margin-bottom: 1rem; }
+        .card-danger { border-color: rgba(198,93,93,.45); background: linear-gradient(180deg, rgba(198,93,93,.08) 0%, var(--card) 2.5rem); }
+        .btn-danger { background: #c65d5d !important; color: #fff !important; border: 1px solid #e08080; }
+        .btn-danger:hover { filter: brightness(1.1); }
+        .top-links { font-size: .9rem; margin: -.25rem 0 1rem; }
+        .top-links a { margin-right: 1rem; }
         a { color: var(--acc); }
     </style>
 </head>
@@ -189,13 +194,27 @@ header('Content-Type: text/html; charset=utf-8');
             </form>
         </div>
     <?php else: ?>
-        <p><a href="?logout=1">Salir</a></p>
+        <div class="top-links">
+            <a href="?logout=1">Salir</a>
+            <a href="#borrar-peer">Borrar peer</a>
+        </div>
         <div class="warn">
             Pegá la <strong>clave pública</strong> del MikroTik (WinBox: <em>WireGuard → Keys → Public</em> o terminal <code>/interface wireguard print keys</code>).
             <strong>No</strong> uses la clave privada en este formulario.
         </div>
+        <?php if ($err !== ''): ?><div class="card"><p class="err"><?= h($err) ?></p></div><?php endif; ?>
+        <div class="card card-danger" id="borrar-peer">
+            <h2 class="h6" style="margin:0 0 .5rem;color:#f0b4b4;font-weight:700;font-size:1rem">Borrar peer (WireGuard)</h2>
+            <p class="sub" style="margin-top:0">Sacá el bloque <code>[Peer]</code> del archivo <code>/etc/wireguard/<?= h(WG_INTERFACE) ?>.conf</code> usando la <strong>clave pública</strong> del MikroTik (la misma que al dar de alta). WireGuard se recarga solo.</p>
+            <form method="post">
+                <input type="hidden" name="remove_peer" value="1">
+                <label>Clave pública del peer a borrar</label>
+                <input name="clave_publica_quitar" required autocomplete="off" placeholder="Pegá la public key completa" value="<?= h((string) ($_POST['clave_publica_quitar'] ?? '')) ?>">
+                <button type="submit" class="btn-danger">Borrar peer</button>
+            </form>
+        </div>
         <div class="card">
-            <?php if ($err !== ''): ?><p class="err"><?= h($err) ?></p><?php endif; ?>
+            <h2 class="h6" style="margin:0 0 .75rem;color:var(--muted);font-weight:600">Agregar peer</h2>
             <form method="post">
                 <input type="hidden" name="add_peer" value="1">
                 <label>Nombre del router (sin espacios; usa _ si hace falta)</label>
@@ -207,16 +226,6 @@ header('Content-Type: text/html; charset=utf-8');
                 <label>IP en el túnel (10.64.0.2–254 con /32; el .1 es el hub)</label>
                 <input name="tunnel_ip" value="<?= h((string) ($_POST['tunnel_ip'] ?? '10.64.0.16/32')) ?>" placeholder="10.64.0.16/32" required>
                 <button type="submit">Agregar peer</button>
-            </form>
-        </div>
-        <div class="card">
-            <h2 class="h6" style="margin:0 0 .75rem;color:var(--muted);font-weight:600">Quitar peer</h2>
-            <p class="sub" style="margin-top:0">Borra el bloque <code>[Peer]</code> de <code>/etc/wireguard/<?= h(WG_INTERFACE) ?>.conf</code> por su <strong>clave pública</strong> (la del MikroTik). Luego recarga WireGuard.</p>
-            <form method="post">
-                <input type="hidden" name="remove_peer" value="1">
-                <label>Clave pública del peer a eliminar</label>
-                <input name="clave_publica_quitar" required autocomplete="off" placeholder="La misma que usaste al dar de alta" value="<?= h((string) ($_POST['clave_publica_quitar'] ?? '')) ?>">
-                <button type="submit" style="background:#c65d5d;color:#fff">Eliminar peer</button>
             </form>
         </div>
         <?php if ($out !== ''): ?>
