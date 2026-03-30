@@ -216,13 +216,28 @@ require __DIR__ . '/partials/header.php';
                         <label class="form-label">Dirección</label>
                         <input class="form-control" name="direccion" value="<?= esc((string) (trim((string) ($_POST['direccion'] ?? '')) !== '' ? (string) $_POST['direccion'] : (string) ($old['direccion'] ?? ''))) ?>">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Latitud</label>
-                        <input class="form-control" name="lat" value="<?= esc((string) ($_POST['lat'] ?? (string) ($old['latitud'] ?? ''))) ?>">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Longitud</label>
-                        <input class="form-control" name="lon" value="<?= esc((string) ($_POST['lon'] ?? (string) ($old['longitud'] ?? ''))) ?>">
+                    <div class="col-12">
+                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                            <label class="form-label mb-0">Ubicación</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-outline-light border-secondary btn-sm px-2 py-1" data-nc-geobtn
+                                        data-nc-lat="#cliente_lat" data-nc-lon="#cliente_lon" data-nc-msg="#clienteGeoMsg"
+                                        title="Rellenar con la posición actual (permiso del navegador)">
+                                    <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+                                </button>
+                                <span id="clienteGeoMsg" class="small text-secondary" role="status"></span>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary mb-1">Latitud</label>
+                                <input id="cliente_lat" class="form-control" name="lat" value="<?= esc((string) ($_POST['lat'] ?? (string) ($old['latitud'] ?? ''))) ?>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary mb-1">Longitud</label>
+                                <input id="cliente_lon" class="form-control" name="lon" value="<?= esc((string) ($_POST['lon'] ?? (string) ($old['longitud'] ?? ''))) ?>">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-6">

@@ -192,16 +192,28 @@ require __DIR__ . '/partials/header.php';
                         <label class="form-label">Dirección</label>
                         <input class="form-control" name="direccion" value="<?= esc((string) ($_POST['direccion'] ?? '')) ?>">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Latitud</label>
-                        <input class="form-control" id="lat" name="lat" value="<?= esc((string) ($_POST['lat'] ?? '')) ?>">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Longitud</label>
-                        <input class="form-control" id="lon" name="lon" value="<?= esc((string) ($_POST['lon'] ?? '')) ?>">
-                    </div>
                     <div class="col-12">
-                        <button class="btn btn-outline-secondary btn-sm" type="button" id="btnGeo">Usar mi ubicación</button>
+                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                            <label class="form-label mb-0">Ubicación</label>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <button class="btn btn-outline-light border-secondary btn-sm px-2 py-1" type="button" id="btnGeo" data-nc-geobtn
+                                        data-nc-lat="#lat" data-nc-lon="#lon" data-nc-msg="#crearGeoMsg"
+                                        title="Rellenar con la posición actual">
+                                    <i class="bi bi-geo-alt-fill me-1" aria-hidden="true"></i>Usar mi ubicación
+                                </button>
+                                <span id="crearGeoMsg" class="small text-secondary" role="status"></span>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary mb-1">Latitud</label>
+                                <input class="form-control" id="lat" name="lat" value="<?= esc((string) ($_POST['lat'] ?? '')) ?>">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary mb-1">Longitud</label>
+                                <input class="form-control" id="lon" name="lon" value="<?= esc((string) ($_POST['lon'] ?? '')) ?>">
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Tipo</label>
@@ -303,14 +315,6 @@ require __DIR__ . '/partials/header.php';
   tipo.addEventListener('change', syncTipo);
   mik.addEventListener('change', filterRedes);
   syncTipo();
-
-  document.getElementById('btnGeo').addEventListener('click', function () {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      document.getElementById('lat').value = pos.coords.latitude;
-      document.getElementById('lon').value = pos.coords.longitude;
-    });
-  });
 })();
 </script>
 

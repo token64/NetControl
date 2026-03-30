@@ -231,15 +231,30 @@ require __DIR__ . '/partials/header.php';
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Ubicación — latitud</label>
-                                <input class="form-control font-monospace" name="latitud" inputmode="decimal" value="<?= esc($latStr) ?>"
-                                       placeholder="18.4321">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Ubicación — longitud</label>
-                                <input class="form-control font-monospace" name="longitud" inputmode="decimal" value="<?= esc($lngStr) ?>"
-                                       placeholder="-69.9464">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                                    <label class="form-label mb-0">Ubicación <span class="text-secondary fw-normal">(opcional)</span></label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="btn btn-outline-light border-secondary btn-sm px-2 py-1" data-nc-geobtn
+                                                data-nc-lat="#router_latitud" data-nc-lon="#router_longitud" data-nc-msg="#routerGeoMsg"
+                                                title="Rellenar con la posición actual (el navegador pedirá permiso; HTTPS o localhost)">
+                                            <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+                                        </button>
+                                        <span id="routerGeoMsg" class="small text-secondary" role="status"></span>
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small text-secondary mb-1">Latitud</label>
+                                        <input id="router_latitud" class="form-control font-monospace" name="latitud" inputmode="decimal" value="<?= esc($latStr) ?>"
+                                               placeholder="18.4321">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small text-secondary mb-1">Longitud</label>
+                                        <input id="router_longitud" class="form-control font-monospace" name="longitud" inputmode="decimal" value="<?= esc($lngStr) ?>"
+                                               placeholder="-69.9464">
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-8">
                                 <label class="form-label">IP / Host <span class="text-secondary fw-normal">(visto desde el panel)</span></label>
