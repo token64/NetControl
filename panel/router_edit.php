@@ -93,8 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
                 $st = $db->prepare(
                     'INSERT INTO mikrotiks (nombre, tipo_equipo, latitud, longitud, ip, api_port, use_ssl, usuario, password, enlace_tipo, notas) VALUES (?,?,?,?,?,?,?,?,?,?,?)'
                 );
+                // 5×s (nombre…ip) + 2×i (puerto, ssl) + 4×s (usuario…notas) = 11
                 $st->bind_param(
-                    'sssssiiissss',
+                    str_repeat('s', 5) . 'ii' . str_repeat('s', 4),
                     $nombre,
                     $tipoEquipo,
                     $latBind,
@@ -116,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
                         'UPDATE mikrotiks SET nombre=?, tipo_equipo=?, latitud=?, longitud=?, ip=?, api_port=?, use_ssl=?, usuario=?, password=?, enlace_tipo=?, notas=? WHERE id=?'
                     );
                     $st->bind_param(
-                        'sssssiiissssi',
+                        str_repeat('s', 5) . 'ii' . str_repeat('s', 4) . 'i',
                         $nombre,
                         $tipoEquipo,
                         $latBind,
@@ -135,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
                         'UPDATE mikrotiks SET nombre=?, tipo_equipo=?, latitud=?, longitud=?, ip=?, api_port=?, use_ssl=?, usuario=?, enlace_tipo=?, notas=? WHERE id=?'
                     );
                     $st->bind_param(
-                        'sssssiiisssi',
+                        str_repeat('s', 5) . 'ii' . str_repeat('s', 3) . 'i',
                         $nombre,
                         $tipoEquipo,
                         $latBind,
