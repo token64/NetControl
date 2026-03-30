@@ -9,11 +9,16 @@ USE panel_wisp;
 CREATE TABLE IF NOT EXISTS mikrotiks (
   id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre        VARCHAR(100) NOT NULL,
+  tipo_equipo   VARCHAR(32) NOT NULL DEFAULT 'mikrotik' COMMENT 'mikrotik | …',
+  latitud       DECIMAL(10,7) DEFAULT NULL,
+  longitud      DECIMAL(10,7) DEFAULT NULL,
   ip            VARCHAR(45)  NOT NULL,
   api_port      SMALLINT UNSIGNED NOT NULL DEFAULT 8728,
   use_ssl       TINYINT(1) NOT NULL DEFAULT 0,
   usuario       VARCHAR(64) NOT NULL,
   password      VARCHAR(255) NOT NULL,
+  enlace_tipo   VARCHAR(32) NOT NULL DEFAULT 'directo' COMMENT 'directo | tunel_vpn | cgnat',
+  notas         VARCHAR(500) DEFAULT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
@@ -99,8 +104,8 @@ CREATE TABLE IF NOT EXISTS pagos (
 ) ENGINE=InnoDB;
 
 -- MikroTik de ejemplo (ejecutar una sola vez o ajustar IP/usuario/clave)
-INSERT INTO mikrotiks (nombre, ip, api_port, use_ssl, usuario, password)
-SELECT 'Principal', '192.168.88.1', 8728, 0, 'admin', 'CAMBIAR_PASSWORD'
+INSERT INTO mikrotiks (nombre, tipo_equipo, ip, api_port, use_ssl, usuario, password)
+SELECT 'Principal', 'mikrotik', '192.168.88.1', 8728, 0, 'admin', 'CAMBIAR_PASSWORD'
 WHERE NOT EXISTS (SELECT 1 FROM mikrotiks LIMIT 1);
 
 INSERT INTO redes (nombre, mikrotik_id, rango, activo)

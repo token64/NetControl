@@ -42,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
         $errors[] = 'Token de seguridad inválido.';
     } else {
         $nombre = trim((string) ($_POST['nombre'] ?? ''));
+        $tipoEquipo = mikrotik_tipo_equipo_normalizado(trim((string) ($_POST['tipo_equipo'] ?? 'mikrotik')));
+        $latRaw = trim((string) ($_POST['latitud'] ?? ''));
+        $lngRaw = trim((string) ($_POST['longitud'] ?? ''));
         $ip = trim((string) ($_POST['ip'] ?? ''));
         $port = (int) ($_POST['api_port'] ?? 8728);
         $useSsl = ! empty($_POST['use_ssl']) ? 1 : 0;
@@ -51,6 +54,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
         $notas = trim((string) ($_POST['notas'] ?? ''));
         if (strlen($notas) > 500) {
             $errors[] = 'Las notas no pueden superar 500 caracteres.';
+        }
+
+        $latitud = $latRaw === '' ? null : (float) str_replace(',', '.', $latRaw);
+        $longitud = $lngRaw === '' ? null : (float) str_replace(',', '.', $lngRaw);
+        if (($latRaw === '') !== ($lngRaw === '')) {
+            $errors[] = 'Ubicación: completá latitud y longitud, o dejá ambas vacías.';
+        }
+        if ($latitud !== null && ($latitud < -90.0 || $latitud > 90.0)) {
+            $errors[] = 'Latitud fuera de rango (-90 … 90).';
+        }
+        if ($longitud !== null && ($longitud < -180.0 || $longitud > 180.0)) {
+            $errors[] = 'Longitud fuera de rango (-180 … 180).';
         }
 
         if ($nombre === '') {
@@ -69,27 +84,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
             $errors[] = 'La contraseña API es obligatoria al crear.';
         }
 
+        $latBind = $latitud === null ? null : number_format($latitud, 7, '.', '');
+        $lngBind = $longitud === null ? null : number_format($longitud, 7, '.', '');
+
         if ($errors === []) {
             $db = db();
             if ($id === 0) {
                 $st = $db->prepare(
-                    'INSERT INTO mikrotiks (nombre, ip, api_port, use_ssl, usuario, password, enlace_tipo, notas) VALUES (?,?,?,?,?,?,?,?)'
+                    'INSERT INTO mikrotiks (nombre, tipo_equipo, latitud, longitud, ip, api_port, use_ssl, usuario, password, enlace_tipo, notas) VALUES (?,?,?,?,?,?,?,?,?,?,?)'
                 );
-                $st->bind_param('ssiissss', $nombre, $ip, $port, $useSsl, $usuario, $password, $enlaceTipo, $notas);
+                $st->bind_param(
+                    'sssssiiissss',
+                    $nombre,
+                    $tipoEquipo,
+                    $latBind,
+                    $lngBind,
+                    $ip,
+                    $port,
+                    $useSsl,
+                    $usuario,
+                    $password,
+                    $enlaceTipo,
+                    $notas
+                );
                 $st->execute();
                 flash_set('success', 'Router creado. Añadí redes IPv4 en el menú lateral si usás clientes con IP fija.');
                 redirect('routers.php');
             } else {
                 if ($password !== '') {
                     $st = $db->prepare(
-                        'UPDATE mikrotiks SET nombre=?, ip=?, api_port=?, use_ssl=?, usuario=?, password=?, enlace_tipo=?, notas=? WHERE id=?'
+                        'UPDATE mikrotiks SET nombre=?, tipo_equipo=?, latitud=?, longitud=?, ip=?, api_port=?, use_ssl=?, usuario=?, password=?, enlace_tipo=?, notas=? WHERE id=?'
                     );
-                    $st->bind_param('ssiissssi', $nombre, $ip, $port, $useSsl, $usuario, $password, $enlaceTipo, $notas, $id);
+                    $st->bind_param(
+                        'sssssiiissssi',
+                        $nombre,
+                        $tipoEquipo,
+                        $latBind,
+                        $lngBind,
+                        $ip,
+                        $port,
+                        $useSsl,
+                        $usuario,
+                        $password,
+                        $enlaceTipo,
+                        $notas,
+                        $id
+                    );
                 } else {
                     $st = $db->prepare(
-                        'UPDATE mikrotiks SET nombre=?, ip=?, api_port=?, use_ssl=?, usuario=?, enlace_tipo=?, notas=? WHERE id=?'
+                        'UPDATE mikrotiks SET nombre=?, tipo_equipo=?, latitud=?, longitud=?, ip=?, api_port=?, use_ssl=?, usuario=?, enlace_tipo=?, notas=? WHERE id=?'
                     );
-                    $st->bind_param('ssiisssi', $nombre, $ip, $port, $useSsl, $usuario, $enlaceTipo, $notas, $id);
+                    $st->bind_param(
+                        'sssssiiisssi',
+                        $nombre,
+                        $tipoEquipo,
+                        $latBind,
+                        $lngBind,
+                        $ip,
+                        $port,
+                        $useSsl,
+                        $usuario,
+                        $enlaceTipo,
+                        $notas,
+                        $id
+                    );
                 }
                 $st->execute();
                 flash_set('success', 'Router actualizado.');
@@ -100,9 +158,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
 }
 
 // Re-lectura tras error
-if ($row && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($row && $_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
     $row = array_merge($row, [
         'nombre' => trim((string) ($_POST['nombre'] ?? $row['nombre'])),
+        'tipo_equipo' => mikrotik_tipo_equipo_normalizado(trim((string) ($_POST['tipo_equipo'] ?? ($row['tipo_equipo'] ?? 'mikrotik')))),
+        'latitud' => trim((string) ($_POST['latitud'] ?? '')) === '' ? null : ($_POST['latitud'] ?? $row['latitud']),
+        'longitud' => trim((string) ($_POST['longitud'] ?? '')) === '' ? null : ($_POST['longitud'] ?? $row['longitud']),
         'ip' => trim((string) ($_POST['ip'] ?? $row['ip'])),
         'api_port' => (int) ($_POST['api_port'] ?? $row['api_port']),
         'use_ssl' => ! empty($_POST['use_ssl']) ? 1 : 0,
@@ -113,6 +174,9 @@ if ($row && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $r = $row ?? [];
+$tipoEquipoVal = mikrotik_tipo_equipo_normalizado(trim((string) ($r['tipo_equipo'] ?? 'mikrotik')));
+$latStr = isset($r['latitud']) && $r['latitud'] !== null && $r['latitud'] !== '' ? (string) $r['latitud'] : '';
+$lngStr = isset($r['longitud']) && $r['longitud'] !== null && $r['longitud'] !== '' ? (string) $r['longitud'] : '';
 $enlaceTipoVal = mikrotik_enlace_normalizado(trim((string) ($r['enlace_tipo'] ?? 'directo')));
 $notasVal = trim((string) ($r['notas'] ?? ''));
 $nClientesMk = $id > 0 ? count_clientes_mikrotik($id) : 0;
@@ -134,7 +198,7 @@ require __DIR__ . '/partials/header.php';
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
     <div>
         <h1 class="h3 mb-0"><?= $id > 0 ? 'Editar router' : 'Nuevo router' ?></h1>
-        <p class="text-secondary small mb-0">Credenciales de la API RouterOS — la IP es la que <strong>alcanza el servidor PHP</strong>, no siempre la WAN del sitio.</p>
+        <p class="text-secondary small mb-0">Misma lógica que en fichas ISP habituales: <strong>IP/Host</strong> = la que <strong>alcanza este panel</strong> (LAN, túnel u otra); usuario/clave API con permisos para <strong>PPP</strong> y <strong>colas simples</strong>.</p>
     </div>
     <a class="btn btn-outline-secondary" href="routers.php">Volver</a>
 </div>
@@ -150,46 +214,82 @@ require __DIR__ . '/partials/header.php';
         <div class="nc-card p-4">
             <form method="post" novalidate>
                 <?= csrf_field() ?>
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label">Nombre</label>
-                        <input class="form-control" name="nombre" required value="<?= esc((string) ($r['nombre'] ?? '')) ?>">
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label">IP o host (visto desde el panel)</label>
-                        <input class="form-control font-monospace" name="ip" required value="<?= esc((string) ($r['ip'] ?? '')) ?>"
-                               placeholder="ej. 192.168.88.1 o 10.64.0.4 (VPN hub)">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Puerto API</label>
-                        <input class="form-control" type="number" name="api_port" min="1" max="65535" value="<?= (int) ($r['api_port'] ?? 8728) ?>">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Tipo de enlace</label>
-                        <select class="form-select" name="enlace_tipo">
-                            <?php foreach (mikrotik_enlace_opciones() as $k => $label): ?>
-                                <option value="<?= esc($k) ?>" <?= $enlaceTipoVal === $k ? 'selected' : '' ?>><?= esc($label) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Notas <span class="text-secondary fw-normal">(opcional)</span></label>
-                        <textarea class="form-control font-monospace small" name="notas" rows="3" maxlength="500" placeholder="Ej. WireGuard peer hub — IP tunel 10.50.0.14; firewall: allow 8728 desde IP del panel"><?= esc($notasVal) ?></textarea>
-                        <div class="form-text">Operativo: no cambia la API; documenta el escenario (túnel, CGNAT, etc.).</div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="use_ssl" value="1" id="use_ssl" <?= ! empty($r['use_ssl']) ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="use_ssl">API sobre TLS (puerto suele ser 8729)</label>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <h2 class="h6 text-secondary text-uppercase border-bottom border-secondary border-opacity-25 pb-2 mb-3">Datos del equipo</h2>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Nombre del router</label>
+                                <input class="form-control" name="nombre" required value="<?= esc((string) ($r['nombre'] ?? '')) ?>"
+                                       placeholder="Ej. MK central, POP norte…">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Tipo de equipo</label>
+                                <select class="form-select" name="tipo_equipo">
+                                    <?php foreach (mikrotik_tipo_equipo_opciones() as $k => $label): ?>
+                                        <option value="<?= esc($k) ?>" <?= $tipoEquipoVal === $k ? 'selected' : '' ?>><?= esc($label) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ubicación — latitud</label>
+                                <input class="form-control font-monospace" name="latitud" inputmode="decimal" value="<?= esc($latStr) ?>"
+                                       placeholder="18.4321">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ubicación — longitud</label>
+                                <input class="form-control font-monospace" name="longitud" inputmode="decimal" value="<?= esc($lngStr) ?>"
+                                       placeholder="-69.9464">
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">IP / Host <span class="text-secondary fw-normal">(visto desde el panel)</span></label>
+                                <input class="form-control font-monospace" name="ip" required value="<?= esc((string) ($r['ip'] ?? '')) ?>"
+                                       placeholder="Igual que “IP/Host” en otros paneles — ej. túnel o LAN">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Puerto API</label>
+                                <input class="form-control" type="number" name="api_port" min="1" max="65535" value="<?= (int) ($r['api_port'] ?? 8728) ?>">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Tipo de enlace</label>
+                                <select class="form-select" name="enlace_tipo">
+                                    <?php foreach (mikrotik_enlace_opciones() as $k => $label): ?>
+                                        <option value="<?= esc($k) ?>" <?= $enlaceTipoVal === $k ? 'selected' : '' ?>><?= esc($label) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">Solo documenta el escenario; no cambia cómo conecta la API.</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Notas <span class="text-secondary fw-normal">(opcional)</span></label>
+                                <textarea class="form-control font-monospace small" name="notas" rows="3" maxlength="500" placeholder="Perfil OVPN, VLAN, quien instaló, etc."><?= esc($notasVal) ?></textarea>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Usuario API</label>
-                        <input class="form-control" name="usuario" required value="<?= esc((string) ($r['usuario'] ?? '')) ?>" autocomplete="off">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Contraseña API</label>
-                        <input class="form-control" type="password" name="password" value="" autocomplete="new-password" placeholder="<?= $id > 0 ? 'Dejar vacío para no cambiar' : '' ?>">
+                    <div class="col-lg-6">
+                        <h2 class="h6 text-secondary text-uppercase border-bottom border-secondary border-opacity-25 pb-2 mb-3">API RouterOS</h2>
+                        <p class="small text-secondary mb-3">Equivalente al modo <strong>PPP / API</strong> de otros sistemas: usuario con <code>read,write,api</code> (o grupo propio) para que el panel pueda gestionar <strong>PPPoE</strong> (<code>/ppp/secret</code>) y <strong>colas simples</strong>.</p>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Usuario API</label>
+                                <input class="form-control" name="usuario" required value="<?= esc((string) ($r['usuario'] ?? '')) ?>" autocomplete="off">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Contraseña API</label>
+                                <input class="form-control" type="password" name="password" value="" autocomplete="new-password" placeholder="<?= $id > 0 ? 'Vacío = no cambiar' : 'Obligatoria al crear' ?>">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="use_ssl" value="1" id="use_ssl" <?= ! empty($r['use_ssl']) ? 'checked' : '' ?>>
+                                    <label class="form-check-label" for="use_ssl">API sobre TLS (puerto típico 8729)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <dl class="small text-secondary mt-4 mb-0">
+                            <dt class="text-light">Control de velocidad</dt>
+                            <dd>NetControl usa <strong>colas simples estáticas</strong> (comentario <code>NetControl-{id}</code>), como “colas simples estáticas” en otros paneles.</dd>
+                            <dt class="text-light mt-2">Traffic Flow / IP visitadas</dt>
+                            <dd>Opcional en RouterOS; si lo activás, es en el propio MikroTik. El panel <strong>no</strong> consulta esos módulos hoy.</dd>
+                        </dl>
                     </div>
                 </div>
                 <div class="mt-4 d-flex flex-wrap gap-2">

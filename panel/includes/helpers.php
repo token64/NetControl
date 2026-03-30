@@ -74,6 +74,19 @@ function mikrotik_enlace_opciones(): array
     ];
 }
 
+/** @return array<string, string> */
+function mikrotik_tipo_equipo_opciones(): array
+{
+    return [
+        'mikrotik' => 'MikroTik',
+    ];
+}
+
+function mikrotik_tipo_equipo_normalizado(string $raw): string
+{
+    return array_key_exists($raw, mikrotik_tipo_equipo_opciones()) ? $raw : 'mikrotik';
+}
+
 function mikrotik_enlace_normalizado(string $raw): string
 {
     $keys = array_keys(mikrotik_enlace_opciones());
