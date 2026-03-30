@@ -5,12 +5,18 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
    - Activá OpenSSH.
    - IP fija recomendada en tu LAN (ej. rango que uses: 192.168.x.x, 10.x.x.x, etc.).
 
-2) Copiá esta carpeta a la VM (desde tu PC con la IP que tomó la VM):
-     scp -r deploy/vpn-hub usuario@IP_VM:~
+2) Copiá los archivos a la VM (desde Windows, en la carpeta del repo NetControl).
+   Mejor (evita doble carpeta vpn-hub/vpn-hub y CRLF si podés):
+     scp -r deploy\vpn-hub\* usuario@IP_VM:~/vpn-hub/
+   Si usaste «scp -r deploy/vpn-hub …:~/vpn-hub» y quedó todo adentro de ~/vpn-hub/vpn-hub,
+     cd ~/vpn-hub/vpn-hub
 
-3) En la VM:
-     cd ~/vpn-hub
-     sudo bash prepare-wireguard-hub.sh
+3) En la VM (en la carpeta donde están los .sh):
+   Si al ejecutar ves «set: pipefail» o «invalid option», los scripts traen finales de línea Windows. Corregí:
+     sudo apt install -y dos2unix && dos2unix *.sh
+   o:  sed -i 's/\r$//' *.sh
+   Luego:
+     sudo bash ./prepare-wireguard-hub.sh
 
    Anotá la «clave pública del servidor» que imprime al final.
 
