@@ -1,0 +1,38 @@
+VPN hub (VM 110 «vpn-hub» en Proxmox) — WireGuard
+=================================================
+
+1) Instalá Ubuntu Server 24.04 en la VM desde la ISO (consola Proxmox).
+   - Activá OpenSSH.
+   - IP fija recomendada en tu LAN (ej. 192.168.13.x).
+
+2) Copiá esta carpeta a la VM (desde tu PC con la IP que tomó la VM):
+     scp -r deploy/vpn-hub usuario@IP_VM:~
+
+3) En la VM:
+     cd ~/vpn-hub
+     sudo bash prepare-wireguard-hub.sh
+
+   Anotá la «clave pública del servidor» que imprime al final.
+
+4) Firewall
+   - Si hay router delante: reenvío UDP del puerto 51820 (o el que pongas en WG_PORT) hacia la IP de la VM.
+   - En la VM, si usás UFW: el script abre el puerto; revisá forward si bloqueás entre interfaces.
+
+5) MikroTik como cliente WireGuard (RouterOS 7)
+   - Interface → WireGuard → + : Name wg-netcontrol, Private Key (generado en el MK: /interface wireguard print keys después de crear).
+   - Peer: Public Key = la del servidor (paso 3); Endpoint = IP pública o DDNS de tu casa + puerto 51820; AllowedIPs puede ser 0.0.0.0/0 (ruteo completo) o solo 10.8.0.1/32 según diseño.
+   - IP → Addresses: asigná en wg-netcontrol la IP del túnel (ej. 10.8.0.16/24) coherente con lo que registrarás en el hub.
+
+6) Registrar el peer en el servidor
+   sudo bash wg-server-add-peer.sh nombre_router 'CLAVE_PUBLICA_DEL_MIKROTIK' 10.8.0.16/32
+
+7) NetControl
+   Routers → IP/host = 10.8.0.16 (o la que usó el MK) + usuario/contraseña API.
+
+Nota: MikroWisp en tus capturas usa OpenVPN (tcp 1194). WireGuard es distinto pero mismo rol (hub 10.8.0.x).
+   Si necesitás OpenVPN tcp por compatibilidad exacta, armá servidor OVPN aparte o pedí script dedicado.
+
+Archivos
+--------
+- prepare-wireguard-hub.sh  — instalación hub
+- wg-server-add-peer.sh     — alta de cada MikroTik / cliente
