@@ -1,6 +1,6 @@
 #!/bin/bash
 # Quita un bloque [Peer] de /etc/wireguard/wg0.conf por su clave PÚBLICA del cliente.
-# Si la clave no está en el archivo pero sí en el kernel, aplica syncconf (alinea con el .conf).
+# Si la clave no está en el archivo pero sí en el kernel: wg set peer remove (evita syncconf roto).
 # Uso: sudo bash wg-server-remove-peer.sh 'BASE64_PUBLICKEY_CLIENTE'
 set -euo pipefail
 
@@ -124,7 +124,7 @@ if not peer_in_dump():
 
 print(
     f"Nota: la clave no está en {conf} pero sí en {wg_if}; "
-    "se aplica syncconf para alinear el kernel con el archivo (quita huérfanos).",
+    "se quitará solo ese peer del kernel (wg set … remove), sin reparsear todo el .conf.",
     file=sys.stderr,
 )
 sys.exit(3)
@@ -141,13 +141,23 @@ elif [[ "${code}" -eq 2 ]]; then
   exit 0
 elif [[ "${code}" -eq 3 ]]; then
   rm -f "$TMP"
+  if ! wg set "${WG_IF}" peer "${PUB}" remove; then
+    echo "wg set peer remove falló (¿interfaz ${WG_IF} caída?)." >&2
+    exit 1
+  fi
+  echo "Listo — peer huérfano quitado del kernel (${CONF} sin cambios). Últimos 6 de la clave: …${PUB: -6}"
+  exit 0
 else
   rm -f "$TMP"
   exit "${code}"
 fi
 
 if systemctl is-active --quiet "wg-quick@${WG_IF}.service" 2>/dev/null; then
-  wg syncconf "${WG_IF}" <(wg-quick strip "${CONF}")
+  if ! sync_err=$(wg syncconf "${WG_IF}" <(wg-quick strip "${CONF}") 2>&1); then
+    echo "${sync_err}" >&2
+    echo "Nota: wg syncconf falló (revisá ${CONF}: no pongas PublicKey en [Interface], solo PrivateKey). Se aplica wg set peer remove." >&2
+    wg set "${WG_IF}" peer "${PUB}" remove
+  fi
 else
   systemctl start "wg-quick@${WG_IF}.service"
 fi
