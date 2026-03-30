@@ -141,7 +141,7 @@ require __DIR__ . '/partials/header.php';
                     <div class="col-12">
                         <label class="form-label">Notas <span class="text-secondary fw-normal">(opcional)</span></label>
                         <textarea class="form-control font-monospace small" name="notas" rows="3" maxlength="500" placeholder="Ej. WireGuard peer hub — IP tunel 10.50.0.14; firewall: allow 8728 desde IP del panel"><?= esc($notasVal) ?></textarea>
-                        <div class="form-text">Sirve para operación: no cambia la conexión API, solo documenta el escenario (túnel, Starlink, etc.).</div>
+                        <div class="form-text">Operativo: no cambia la API; documenta el escenario (túnel, CGNAT, etc.).</div>
                     </div>
                     <div class="col-12">
                         <div class="form-check">

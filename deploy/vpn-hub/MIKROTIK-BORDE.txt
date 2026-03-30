@@ -13,24 +13,24 @@ IP → Firewall → NAT → Add
   Chain: dstnat
   Protocol: udp
   Dst. port: 51820
-  In. interface: tu WAN pública (ej. sfp-sfpplus2-WAN-1)
+  In. interface: tu WAN pública (ej. ether1, pppoe-out1, etc.)
   Action: dst-nat
-  To addresses: IP LAN de la VM (ej. 192.168.13.45)
+  To addresses: IP LAN de la VM hub (ej. 192.168.1.50; ajustá a tu red)
   To ports: 51820
   Comment: WireGuard hub NetControl
 
 Equivalente Terminal (ajustá interfaz e IP):
 
-  /ip firewall nat add chain=dstnat protocol=udp dst-port=51820 in-interface=sfp-sfpplus2-WAN-1 \
-    action=dst-nat to-addresses=192.168.13.45 to-ports=51820 comment="WireGuard hub NetControl"
+  /ip firewall nat add chain=dstnat protocol=udp dst-port=51820 in-interface=<tu-WAN> \
+    action=dst-nat to-addresses=192.168.1.50 to-ports=51820 comment="WireGuard hub NetControl"
 
 Si tenés varias WAN: una regla por entrada o usá in-interface-list.
 
 2) DHCP estático (opcional pero recomendado)
 --------------------------------------------
 IP → DHCP Server → Leases → Add
-  MAC: bc:24:11:91:3c:6f  (ejemplo virtio Proxmox; ver en la VM: ip link show ens18)
-  Address: 192.168.13.45
+  MAC: la de la NIC de la VM en Linux (ver: ip link)
+  Address: misma IP LAN que uses para la VM hub (coherente con el dst-nat)
   Server: el servidor DHCP de esa VLAN/LAN
 
 Sirve para que la VM hub no pierda IP si en algún momento usás DHCP,
@@ -42,9 +42,9 @@ El panel PHP debe poder hacer TCP a 10.64.0.x:8728.
 Si el servidor NetControl está en la misma LAN que el MikroTik, a veces
 el propio MK ya enruta la red WireGuard; si no, agregá:
 
-  /ip route add dst-address=10.64.0.0/24 gateway=192.168.13.45 comment="VPN hub WG"
+  /ip route add dst-address=10.64.0.0/24 gateway=192.168.1.50 comment="VPN hub WG"
 
-(192.168.13.45 = IP LAN del Linux donde corre wg0; ajustá según tu red.)
+(gateway = IP LAN del Linux donde corre wg0; debe coincidir con la IP que pusiste en el dst-nat.)
 
 4) Firewall
 -----------

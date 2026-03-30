@@ -44,7 +44,7 @@ require __DIR__ . '/partials/header.php';
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
     <div>
         <h1 class="h3 mb-0">Routers (MikroTik API)</h1>
-        <p class="text-secondary small mb-0">Alta de equipos para sincronizar PPPoE y colas simples</p>
+        <p class="text-secondary small mb-0">Alta de equipos para sincronizar PPPoE y colas. <a href="#ayuda-enlaces-mikrotik">Guía: IP alcanzable, CGNAT y VPN</a></p>
     </div>
     <a class="btn btn-nc-primary" href="router_edit.php">Nuevo router</a>
 </div>
@@ -56,6 +56,7 @@ require __DIR__ . '/partials/header.php';
             <tr>
                 <th>Nombre</th>
                 <th>IP / puerto</th>
+                <th>Enlace</th>
                 <th>SSL</th>
                 <th>Usuario API</th>
                 <th class="text-end">Acciones</th>
@@ -67,6 +68,16 @@ require __DIR__ . '/partials/header.php';
                     <tr>
                         <td><strong><?= esc((string) $r['nombre']) ?></strong></td>
                         <td class="font-monospace small"><?= esc((string) $r['ip']) ?>:<?= (int) $r['api_port'] ?></td>
+                        <td>
+                            <?php
+                            $et = mikrotik_enlace_normalizado((string) ($r['enlace_tipo'] ?? 'directo'));
+                            $op = mikrotik_enlace_opciones();
+                            ?>
+                            <span class="badge <?= esc(mikrotik_enlace_badge_class($et)) ?>"><?= esc($op[$et] ?? $et) ?></span>
+                            <?php if (trim((string) ($r['notas'] ?? '')) !== ''): ?>
+                                <i class="bi bi-info-circle text-secondary ms-1" title="<?= esc(trim((string) $r['notas'])) ?>"></i>
+                            <?php endif; ?>
+                        </td>
                         <td><?= ! empty($r['use_ssl']) ? 'Sí' : 'No' ?></td>
                         <td><?= esc((string) $r['usuario']) ?></td>
                         <td class="text-end">
@@ -83,12 +94,16 @@ require __DIR__ . '/partials/header.php';
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="5" class="text-center text-secondary py-5">No hay routers. Crea el primero o ejecutá <code>sql/schema.sql</code>.</td>
+                    <td colspan="6" class="text-center text-secondary py-5">No hay routers. Crea el primero o ejecutá <code>sql/schema.sql</code>.</td>
                 </tr>
             <?php endif; ?>
             </tbody>
         </table>
     </div>
+</div>
+
+<div class="mt-4">
+    <?php require __DIR__ . '/partials/mikrotik_ayuda_enlaces.php'; ?>
 </div>
 
 <?php require __DIR__ . '/partials/footer.php';

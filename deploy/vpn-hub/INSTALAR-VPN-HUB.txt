@@ -1,9 +1,9 @@
-VPN hub (VM 110 «vpn-hub» en Proxmox) — WireGuard
-=================================================
+VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
+===========================================================
 
-1) Instalá Ubuntu Server 24.04 en la VM desde la ISO (consola Proxmox).
+1) Instalá Ubuntu Server 24.04 en una VM (ISO desde el hipervisor o imagen cloud).
    - Activá OpenSSH.
-   - IP fija recomendada en tu LAN (ej. 192.168.13.x).
+   - IP fija recomendada en tu LAN (ej. rango que uses: 192.168.x.x, 10.x.x.x, etc.).
 
 2) Copiá esta carpeta a la VM (desde tu PC con la IP que tomó la VM):
      scp -r deploy/vpn-hub usuario@IP_VM:~

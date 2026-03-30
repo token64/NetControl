@@ -54,6 +54,7 @@ require __DIR__ . '/partials/header.php';
     <div>
         <h1 class="h3 mb-0">Diagnóstico API RouterOS</h1>
         <p class="text-secondary small mb-0">Vista rápida por defecto; los conteos son opcionales y usan <code>count-only</code> (sin bajar miles de filas).</p>
+        <p class="small mb-0"><a href="routers.php#ayuda-enlaces-mikrotik">Guía: IP alcanzable, VPN y CGNAT</a></p>
     </div>
     <a class="btn btn-outline-secondary" href="dashboard.php">Inicio</a>
 </div>

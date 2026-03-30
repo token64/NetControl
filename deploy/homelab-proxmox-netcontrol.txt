@@ -32,7 +32,7 @@ Contenedor NetControl (panel WISP, este repo)
 Migraciones SQL adicionales (ej. finanzas)
 ------------------------------------------
 - sql/migration_finanzas_pagos.sql — tabla `pagos` (registrar cobros / transacciones).
-- sql/migration_mikrotiks_enlace_notas.sql — tipo de enlace + notas en `mikrotiks` (Starlink/VPN).
+- sql/migration_mikrotiks_enlace_notas.sql — tipo de enlace + notas en `mikrotiks` (CGNAT/VPN).
 
 Actualizar código del CT sin SSH al .73
 ------------------------------

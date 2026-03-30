@@ -63,3 +63,28 @@ function nc_initials(string $name): string
     $s = function_exists('mb_substr') ? mb_substr($name, 0, 2) : substr($name, 0, 2);
     return strtoupper($s);
 }
+
+/** @return array<string, string> clave BD => etiqueta formulario */
+function mikrotik_enlace_opciones(): array
+{
+    return [
+        'directo' => 'Directo — LAN o IP pública que el panel alcanza',
+        'tunel_vpn' => 'Túnel / VPN — IP (o host) en el enlace hacia el MK',
+        'cgnat' => 'CGNAT / sin IPv4 pública — usar IP del túnel u overlay; ver ayuda',
+    ];
+}
+
+function mikrotik_enlace_normalizado(string $raw): string
+{
+    $keys = array_keys(mikrotik_enlace_opciones());
+    return in_array($raw, $keys, true) ? $raw : 'directo';
+}
+
+function mikrotik_enlace_badge_class(string $tipo): string
+{
+    return match ($tipo) {
+        'tunel_vpn' => 'text-bg-primary',
+        'cgnat' => 'text-bg-warning',
+        default => 'text-bg-secondary',
+    };
+}
