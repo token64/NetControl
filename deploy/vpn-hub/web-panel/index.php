@@ -27,6 +27,35 @@ if (! defined('WG_REMOVE_PEER_SCRIPT')) {
     define('WG_REMOVE_PEER_SCRIPT', dirname(WG_ADD_PEER_SCRIPT) . '/wg-server-remove-peer.sh');
 }
 
+/** Primera ruta legible por el proceso PHP (típ. www-data). */
+function wg_resolve_remove_script(): ?string
+{
+    $seen = [];
+    $try = [
+        WG_REMOVE_PEER_SCRIPT,
+        dirname(WG_ADD_PEER_SCRIPT) . '/wg-server-remove-peer.sh',
+        '/usr/local/sbin/wg-server-remove-peer.sh',
+    ];
+    foreach ($try as $p) {
+        $p = (string) $p;
+        if ($p === '' || isset($seen[$p])) {
+            continue;
+        }
+        $seen[$p] = true;
+        if (is_readable($p)) {
+            return $p;
+        }
+    }
+
+    return null;
+}
+
+function wg_remove_script_missing_hint(): string
+{
+    return ' En la VM vpn-hub (SSH root o sudo): cd ~/NetControl && git pull && sudo install -m 755 deploy/vpn-hub/wg-server-remove-peer.sh /usr/local/sbin/wg-server-remove-peer.sh'
+        . ' — y en /etc/sudoers.d/nc-vpn-panel una línea NOPASSWD para: /bin/bash /usr/local/sbin/wg-server-remove-peer.sh *';
+}
+
 function h(?string $s): string
 {
     return htmlspecialchars((string) $s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -122,19 +151,23 @@ if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_pee
     $pubRm = trim((string) ($_POST['clave_publica_quitar'] ?? ''));
     if (! valid_wg_pubkey($pubRm)) {
         $err = 'Para quitar: pegá la misma clave pública del peer que figura en el error o en wg show.';
-    } elseif (! is_readable(WG_REMOVE_PEER_SCRIPT)) {
-        $err = 'No existe o no se puede leer: ' . WG_REMOVE_PEER_SCRIPT;
     } else {
-        $rm = realpath(WG_REMOVE_PEER_SCRIPT) ?: WG_REMOVE_PEER_SCRIPT;
-        $cmdRm = sprintf(
-            'sudo -n /bin/bash %s %s 2>&1',
-            escapeshellarg($rm),
-            escapeshellarg($pubRm)
-        );
-        exec($cmdRm, $linesRm, $codeRm);
-        $out = implode("\n", $linesRm);
-        if ($codeRm !== 0) {
-            $err = 'El script de baja devolvió error. Revisá la salida abajo.';
+        $rmPath = wg_resolve_remove_script();
+        if ($rmPath === null) {
+            $err = 'No hay wg-server-remove-peer.sh legible para www-data (config, carpeta del script de alta, o /usr/local/sbin).'
+                . wg_remove_script_missing_hint();
+        } else {
+            $rm = realpath($rmPath) ?: $rmPath;
+            $cmdRm = sprintf(
+                'sudo -n /bin/bash %s %s 2>&1',
+                escapeshellarg($rm),
+                escapeshellarg($pubRm)
+            );
+            exec($cmdRm, $linesRm, $codeRm);
+            $out = implode("\n", $linesRm);
+            if ($codeRm !== 0) {
+                $err = 'El script de baja devolvió error. Revisá la salida abajo.';
+            }
         }
     }
 }
