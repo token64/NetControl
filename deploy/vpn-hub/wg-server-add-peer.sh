@@ -12,14 +12,15 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 
 if [[ $# -lt 3 ]]; then
-  echo "Uso: $0 <comentario_sin_espacios> <clave_publica_cliente_wg> <ip_tunnel_cliente/32>"
-  echo "Ej: $0 mk_chavon 'hOQoR8…=' 10.64.0.16/32"
+  echo "Uso: $0 <comentario_sin_espacios> <clave_publica_cliente_wg> <ip_tunnel_cliente/32> [descripcion_opcional]"
+  echo "Ej: $0 mk_chavon 'hOQoR8…=' 10.64.0.16/32 'POP norte'"
   exit 1
 fi
 
 COMMENT="$1"
 PUB="$2"
 TUN_IP="$3"
+DESC="${4:-}"
 
 if [[ ! -f "${CONF}" ]]; then
   echo "No existe ${CONF}. Primero ejecutá prepare-wireguard-hub.sh"
@@ -34,6 +35,9 @@ fi
 {
   echo ""
   echo "# ${COMMENT}"
+  if [[ -n "${DESC}" ]]; then
+    echo "# ${DESC}"
+  fi
   echo "[Peer]"
   echo "PublicKey = ${PUB}"
   echo "AllowedIPs = ${TUN_IP}"
