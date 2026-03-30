@@ -29,3 +29,11 @@ Desde Windows (copia clave SSH y ejecuta el mismo bootstrap por red):
 
 Proxmox (opcional): habilitar «QEMU Guest Agent» en la VM permite operar el invitado por API;
 sin agente, hay que usar consola/SSH.
+
+Actualizar esquema tras git pull (error al guardar routers / columnas faltantes):
+  cd /var/www/NetControl && sudo git pull --ff-only
+  sudo bash deploy/apply-panel-migrations.sh
+  sudo systemctl reload apache2
+
+Lee usuario/clave/base desde panel/config.php (no hace falta pegarlas en la consola).
+Si MySQL dice «Duplicate column», esa migración ya estaba aplicada; avisá y revisamos el orden.
