@@ -1,5 +1,6 @@
 #!/bin/bash
 # Quita un bloque [Peer] de /etc/wireguard/wg0.conf por su clave PÚBLICA del cliente.
+# Si la clave no está en el archivo pero sí en el kernel, aplica syncconf (alinea con el .conf).
 # Uso: sudo bash wg-server-remove-peer.sh 'BASE64_PUBLICKEY_CLIENTE'
 set -euo pipefail
 
@@ -23,76 +24,127 @@ if [[ ! -f "${CONF}" ]]; then
   exit 1
 fi
 
-if ! grep -Fq "PublicKey = ${PUB}" "${CONF}"; then
-  echo "No hay ningún peer con esa clave pública en ${CONF}."
-  exit 1
-fi
-
 TMP="$(mktemp)"
-export CONF PUB TMP
+export CONF PUB TMP WG_IF
+
+set +e
 python3 <<'PY'
-import os, sys
+import os, re, subprocess, sys
 
 conf = os.environ["CONF"]
 want = os.environ["PUB"].strip()
 path_tmp = os.environ["TMP"]
+wg_if = os.environ["WG_IF"]
+
+
+def parse_pubkey_token(line: str):
+    s = line.strip()
+    m = re.match(r"^PublicKey\s*=\s*(.+)$", s, re.I)
+    if not m:
+        return None
+    tok = m.group(1).strip().split()[0]
+    return tok.replace("\r", "")
+
+
+def peer_in_dump() -> bool:
+    r = subprocess.run(
+        ["wg", "show", wg_if, "dump"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if r.returncode != 0:
+        print((r.stderr or r.stdout or "wg dump falló").strip(), file=sys.stderr)
+        sys.exit(1)
+    first = True
+    for line in r.stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        parts = line.split("\t")
+        if first:
+            first = False
+            continue
+        if parts and parts[0] == want:
+            return True
+    return False
+
 
 with open(conf, "r", encoding="utf-8") as f:
     lines = f.read().splitlines(keepends=True)
 
-# índice de la línea PublicKey = want
 pk_line = None
 for i, line in enumerate(lines):
-    s = line.strip()
-    if not s.startswith("PublicKey ="):
-        continue
-    got = s.split("=", 1)[1].strip()
-    if got == want:
+    got = parse_pubkey_token(line)
+    if got is not None and got == want:
         pk_line = i
         break
-if pk_line is None:
-    print("No se encontró el peer (clave pública).", file=sys.stderr)
-    sys.exit(1)
 
-if pk_line < 1 or lines[pk_line - 1].strip() != "[Peer]":
-    print("Bloque mal formado: falta [Peer] antes de PublicKey.", file=sys.stderr)
-    sys.exit(1)
+if pk_line is not None:
+    if pk_line < 1 or lines[pk_line - 1].strip() != "[Peer]":
+        print("Bloque mal formado: falta [Peer] antes de PublicKey.", file=sys.stderr)
+        sys.exit(1)
 
-peer_line = pk_line - 1
-# Subir comentarios (#…) y una línea en blanco previa (formato de add-peer.sh)
-start = peer_line
-i = peer_line - 1
-while i >= 0:
-    t = lines[i].rstrip("\n\r")
-    if t.strip().startswith("#"):
-        start = i
-        i -= 1
-        continue
-    if t.strip() == "":
-        start = i
-        i -= 1
+    peer_line = pk_line - 1
+    start = peer_line
+    i = peer_line - 1
+    while i >= 0:
+        t = lines[i].rstrip("\n\r")
+        if t.strip().startswith("#"):
+            start = i
+            i -= 1
+            continue
+        if t.strip() == "":
+            start = i
+            i -= 1
+            break
         break
-    # línea de otro bloque (p.ej. PostDown, AllowedIPs anterior): no consumir
-    break
 
-# Bajar hasta AllowedIPs de este peer
-end = pk_line
-while end < len(lines):
-    if lines[end].strip().startswith("AllowedIPs"):
+    end = pk_line
+    while end < len(lines):
+        if lines[end].strip().startswith("AllowedIPs"):
+            end += 1
+            break
         end += 1
-        break
-    end += 1
-else:
-    print("Bloque sin AllowedIPs.", file=sys.stderr)
-    sys.exit(1)
+    else:
+        print("Bloque sin AllowedIPs.", file=sys.stderr)
+        sys.exit(1)
 
-new_lines = lines[:start] + lines[end:]
-with open(path_tmp, "w", encoding="utf-8") as f:
-    f.writelines(new_lines)
+    new_lines = lines[:start] + lines[end:]
+    with open(path_tmp, "w", encoding="utf-8") as f:
+        f.writelines(new_lines)
+    sys.exit(0)
+
+if not peer_in_dump():
+    print(
+        f"No hay peer con esa clave en {conf} ni en la interfaz {wg_if} (quizá ya fue quitado).",
+        file=sys.stderr,
+    )
+    sys.exit(2)
+
+print(
+    f"Nota: la clave no está en {conf} pero sí en {wg_if}; "
+    "se aplica syncconf para alinear el kernel con el archivo (quita huérfanos).",
+    file=sys.stderr,
+)
+sys.exit(3)
 PY
+code=$?
+set -e
 
-mv -f "$TMP" "${CONF}"
-chmod 600 "${CONF}"
+if [[ "${code}" -eq 0 ]]; then
+  mv -f "$TMP" "${CONF}"
+  chmod 600 "${CONF}"
+elif [[ "${code}" -eq 2 ]]; then
+  rm -f "$TMP"
+  echo "Listo (peer ya no figuraba; nada que aplicar)."
+  exit 0
+elif [[ "${code}" -eq 3 ]]; then
+  rm -f "$TMP"
+else
+  rm -f "$TMP"
+  exit "${code}"
+fi
 
 if systemctl is-active --quiet "wg-quick@${WG_IF}.service" 2>/dev/null; then
   wg syncconf "${WG_IF}" <(wg-quick strip "${CONF}")
@@ -100,5 +152,4 @@ else
   systemctl start "wg-quick@${WG_IF}.service"
 fi
 
-echo "Peer eliminado (últimos 6 de la clave: …${PUB: -6})."
-echo "Estado: wg show ${WG_IF}"
+echo "Listo (últimos 6 de la clave: …${PUB: -6}). Estado: wg show ${WG_IF}"
