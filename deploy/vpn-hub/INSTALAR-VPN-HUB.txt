@@ -23,20 +23,20 @@ VPN hub (VM 110 «vpn-hub» en Proxmox) — WireGuard
 
 6) MikroTik como cliente WireGuard (RouterOS 7)
    - Interface → WireGuard → + : Name wg-netcontrol, Private Key (generado en el MK: /interface wireguard print keys después de crear).
-   - Peer: Public Key = la del servidor (paso 3); Endpoint = IP pública o DDNS de tu casa + puerto 51820; AllowedIPs puede ser 0.0.0.0/0 (ruteo completo) o solo 10.8.0.1/32 según diseño.
-   - IP → Addresses: asigná en wg-netcontrol la IP del túnel (ej. 10.8.0.16/24) coherente con lo que registrarás en el hub.
+   - Peer: Public Key = la del servidor (paso 3); Endpoint = IP pública o DDNS de tu casa + puerto 51820; AllowedIPs puede ser 0.0.0.0/0 (ruteo completo) o solo 10.64.0.1/32 según diseño.
+   - IP → Addresses: asigná en wg-netcontrol la IP del túnel (ej. 10.64.0.16/24) coherente con lo que registrarás en el hub.
 
 7) Registrar el peer en el servidor
-   sudo bash wg-server-add-peer.sh nombre_router 'CLAVE_PUBLICA_DEL_MIKROTIK' 10.8.0.16/32
+   sudo bash wg-server-add-peer.sh nombre_router 'CLAVE_PUBLICA_DEL_MIKROTIK' 10.64.0.16/32
 
 8) NetControl
-   Routers → IP/host = 10.8.0.16 (o la que usó el MK) + usuario/contraseña API.
+   Routers → IP/host = 10.64.0.16 (o la que usó el MK) + usuario/contraseña API.
 
-Nota: MikroWisp en tus capturas usa OpenVPN (tcp 1194). WireGuard es distinto pero mismo rol (hub 10.8.0.x).
+Nota: MikroWisp suele usar otra red VPN (a menudo 10.8.0.x con OpenVPN tcp 1194). Este hub NetControl usa 10.64.0.0/24 para no chocar con ese rango.
    Si necesitás OpenVPN tcp por compatibilidad exacta, armá servidor OVPN aparte o pedí script dedicado.
 
 Archivos
 --------
 - prepare-wireguard-hub.sh  — instalación hub
 - wg-server-add-peer.sh     — alta de cada MikroTik / cliente
-- MIKROTIK-BORDE.txt        — NAT 51820, DHCP, ruta 10.8.0.0/24 en el router central
+- MIKROTIK-BORDE.txt        — NAT 51820, DHCP, ruta 10.64.0.0/24 en el router central

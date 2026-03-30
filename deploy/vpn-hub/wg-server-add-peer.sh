@@ -1,6 +1,6 @@
 #!/bin/bash
 # Agrega un [Peer] a /etc/wireguard/wg0.conf y recarga.
-# Uso: sudo bash wg-server-add-peer.sh chavon_mikrotik 'BASE64_PUBLICKEY_CLIENT' 10.8.0.16
+# Uso: sudo bash wg-server-add-peer.sh chavon_mikrotik 'BASE64_PUBLICKEY_CLIENT' 10.64.0.16
 set -euo pipefail
 
 WG_IF="${WG_IF:-wg0}"
@@ -13,7 +13,7 @@ fi
 
 if [[ $# -lt 3 ]]; then
   echo "Uso: $0 <comentario_sin_espacios> <clave_publica_cliente_wg> <ip_tunnel_cliente/32>"
-  echo "Ej: $0 mk_chavon 'hOQoR8…=' 10.8.0.16/32"
+  echo "Ej: $0 mk_chavon 'hOQoR8…=' 10.64.0.16/32"
   exit 1
 fi
 

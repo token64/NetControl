@@ -1,13 +1,13 @@
 #!/bin/bash
-# NetControl — preparar VM Ubuntu como hub WireGuard (red 10.8.0.0/24).
+# NetControl — preparar VM Ubuntu como hub WireGuard (red 10.64.0.0/24, distinta a MikroWisp 10.8.0.x).
 # Ejecutar EN la VM vpn-hub tras instalar Ubuntu Server:
 #   sudo bash prepare-wireguard-hub.sh
 set -euo pipefail
 
 WG_IF="wg0"
 WG_PORT="${WG_PORT:-51820}"
-WG_NET="10.8.0.0/24"
-SRV_TUN_IP="10.8.0.1/24"
+WG_NET="10.64.0.0/24"
+SRV_TUN_IP="10.64.0.1/24"
 
 if [[ "$(id -u)" -ne 0 ]]; then
   echo "Corré con sudo."
@@ -64,10 +64,10 @@ systemctl enable --now "wg-quick@${WG_IF}"
 echo ""
 echo "=== Hub WireGuard listo ==="
 echo "Puerto UDP: ${WG_PORT}  (abrilo en firewall externo / router hacia esta VM si aplica)"
-echo "Red túnel:  ${WG_NET}  (servidor = 10.8.0.1)"
+echo "Red túnel:  ${WG_NET}  (servidor = 10.64.0.1)"
 echo "Clave pública del servidor (pegala en el cliente MikroTik / Linux):"
 echo "${SERV_PUB}"
 echo ""
-echo "Agregar un cliente (clave pública del remote + IP fija 10.8.0.x):"
-echo "  sudo bash wg-server-add-peer.sh NOMBRE CLIENT_PUBKEY 10.8.0.16"
-echo "En NetControl → Routers usá la IP del túnel del MK (ej. 10.8.0.16) y API."
+echo "Agregar un cliente (clave pública del remote + IP fija 10.64.0.x):"
+echo "  sudo bash wg-server-add-peer.sh NOMBRE CLIENT_PUBKEY 10.64.0.16"
+echo "En NetControl → Routers usá la IP del túnel del MK (ej. 10.64.0.16) y API."

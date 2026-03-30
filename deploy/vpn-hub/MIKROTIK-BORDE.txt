@@ -5,7 +5,7 @@ Lógica en una frase
 -------------------
 Los routers remotos hacen salida UDP hacia tu IP/DDNS público:51820.
 Tu MikroTik central reenvía ese tráfico a la VM Ubuntu (hub) en la LAN.
-El hub asigna 10.8.0.x al cliente; NetControl usa esa IP para la API.
+El hub asigna 10.64.0.x al cliente; NetControl usa esa IP para la API.
 
 1) NAT (reenvío de puerto) hacia la VM hub
 ------------------------------------------
@@ -36,13 +36,13 @@ IP → DHCP Server → Leases → Add
 Sirve para que la VM hub no pierda IP si en algún momento usás DHCP,
 o para marcar en el router qué IP no debe asignar el pool a otros.
 
-3) Ruta hacia 10.8.0.0/24 (si NetControl no ve el túnel)
+3) Ruta hacia 10.64.0.0/24 (si NetControl no ve el túnel)
 ---------------------------------------------------------
-El panel PHP debe poder hacer TCP a 10.8.0.x:8728.
+El panel PHP debe poder hacer TCP a 10.64.0.x:8728.
 Si el servidor NetControl está en la misma LAN que el MikroTik, a veces
 el propio MK ya enruta la red WireGuard; si no, agregá:
 
-  /ip route add dst-address=10.8.0.0/24 gateway=192.168.13.45 comment="VPN hub WG"
+  /ip route add dst-address=10.64.0.0/24 gateway=192.168.13.45 comment="VPN hub WG"
 
 (192.168.13.45 = IP LAN del Linux donde corre wg0; ajustá según tu red.)
 
