@@ -61,11 +61,10 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
    - Copiar scripts al PATH de root (recomendado; www-data no lee /home):
      sudo install -m 755 ~/NetControl/deploy/vpn-hub/wg-server-add-peer.sh /usr/local/sbin/
      sudo install -m 755 ~/NetControl/deploy/vpn-hub/wg-server-remove-peer.sh /usr/local/sbin/
-   - Sudo para el panel (visudo -f /etc/sudoers.d/nc-vpn-panel; chmod 0440). Los comandos llevan * para permitir argumentos.
-       www-data ALL=(root) NOPASSWD: /bin/bash /usr/local/sbin/wg-server-add-peer.sh *
-       www-data ALL=(root) NOPASSWD: /bin/bash /usr/local/sbin/wg-server-remove-peer.sh *
-       www-data ALL=(root) NOPASSWD: /usr/bin/wg show wg0
-     (Si wg está en otra ruta: which wg)
+   - Sudo para el panel (automático, recomendado):
+       cd ~/NetControl && sudo bash deploy/vpn-hub/apply-nc-vpn-panel-sudoers.sh
+     Eso escribe /etc/sudoers.d/nc-vpn-panel con líneas con y sin * (evita «password required» al probar sin args).
+     Manual: visudo -f /etc/sudoers.d/nc-vpn-panel — mismas reglas que el script.
    - Si usás UFW y querés HTTP desde la LAN:
      sudo ufw allow from 192.168.13.0/24 to any port 80 proto tcp
      (Ajustá el /24 a tu red; en producción conviene HTTPS y restricción por IP.)
