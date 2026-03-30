@@ -40,7 +40,10 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
 
 9) Panel web PHP (alta de peers desde el navegador)
    Carpeta en el repo: deploy/vpn-hub/web-panel/
-   - Instalá Apache y PHP (en la VM hub):
+   - Opción rápida (en la VM, con todos los archivos de vpn-hub en ~/vpn-hub, incl. web-panel/):
+       cd ~/vpn-hub && sudo bash ./install-web-panel-apache.sh
+     Eso instala Apache+PHP, copia web-panel a /var/www/html/vpn-panel y arranca el servicio.
+   - Manual: Instalá Apache y PHP (en la VM hub):
      sudo apt update && sudo apt install -y apache2 libapache2-mod-php php
    - Copiá la carpeta web-panel al servidor web (ej. desde tu PC, ajustá usuario e IP LAN de la VM):
      scp -r deploy\vpn-hub\web-panel usuario@IP_VM:/tmp/web-panel
@@ -75,4 +78,5 @@ Archivos
 - prepare-wireguard-hub.sh  — instalación hub
 - wg-server-add-peer.sh     — alta de cada MikroTik / cliente
 - web-panel/                — panel PHP (nombre, descripción, clave pública, IP túnel)
+- install-web-panel-apache.sh — instala Apache+PHP y publica /vpn-panel/ en la VM
 - MIKROTIK-BORDE.txt        — NAT 51820, DHCP, ruta 10.64.0.0/24 en el router central
