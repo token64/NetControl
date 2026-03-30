@@ -143,8 +143,8 @@ if ($flash): ?>
         </div>
 
         <p class="small text-secondary mt-3 mb-0">
-            Referencia: en plataformas ISP la promesa fija una <em>fecha de compromiso</em> antes de aplicar suspensión por deuda vencida
-            (por ejemplo documentación Wispro / WispHub sobre promesas de pago).
+            Referencia: en gestión ISP la promesa suele fijar una <em>fecha de compromiso</em> antes de aplicar suspensión por deuda vencida
+            (concepto habitual en facturación y morosidad).
         </p>
     </div>
 </div>
