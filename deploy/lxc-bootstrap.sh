@@ -1,5 +1,6 @@
 #!/bin/bash
-# NetControl — Debian LXC: Apache + PHP + MariaDB + clon desde GitHub.
+# NetControl — Debian LXC o Ubuntu Server 22.04/24.04 VM: Apache + PHP + MariaDB + clon desde GitHub.
+# Repo: https://github.com/token64/NetControl (rama main)
 # Primera instalación: crea DB, usuario MySQL, config.php, Apache.
 # Re-ejecución: solo actualiza sistema + git pull (no toca config.php ni borra credenciales).
 # Homelab Proxmox + MCP (referencia): deploy/homelab-proxmox-netcontrol.txt
@@ -117,6 +118,7 @@ CREDS="/root/netcontrol-credentials.txt"
 } >"$CREDS"
 chmod 0600 "$CREDS"
 
-echo "Listo. Credenciales: ${CREDS}"
+echo "Listo. Credenciales en: ${CREDS}"
+echo "Ver: sudo cat /root/netcontrol-credentials.txt   (netcontrol con «o», no netcontrl)"
 IP1="$(hostname -I | awk '{print $1}')"
 echo "Probar: http://${IP1}/netcontrol/"

@@ -1,0 +1,31 @@
+NetControl — instalar en Ubuntu Server (VM o bare metal)
+==========================================================
+Repositorio GitHub: https://github.com/token64/NetControl  (rama main)
+
+Qué instala el script oficial (deploy/lxc-bootstrap.sh):
+  - Apache2, PHP (mysqli, mbstring, xml, curl), MariaDB, git, curl
+  - Clona el repo en /var/www/NetControl
+  - Crea BD panel_wisp, usuario MySQL netcontrol, panel/config.php
+  - Alias Apache: http://<IP>/netcontrol/
+
+En la consola de la VM (usuario con sudo), una sola vez:
+
+  sudo apt-get update
+  sudo apt-get install -y curl ca-certificates
+  curl -fsSL https://raw.githubusercontent.com/token64/NetControl/main/deploy/lxc-bootstrap.sh | sudo bash
+
+Credenciales al terminar:
+
+  sudo cat /root/netcontrol-credentials.txt
+
+  (nombre exacto: netcontrol-credentials.txt)
+
+Panel: http://<IP-de-la-VM>/netcontrol/   usuario inicial: admin / admin
+
+Desde Windows (copia clave SSH y ejecuta el mismo bootstrap por red):
+
+  cd C:\xampp\htdocs\NetControl
+  .\deploy\netcontrol-remote-bootstrap.ps1 -HostName "192.168.13.50" -User "jose"
+
+Proxmox (opcional): habilitar «QEMU Guest Agent» en la VM permite operar el invitado por API;
+sin agente, hay que usar consola/SSH.

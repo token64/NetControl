@@ -121,10 +121,24 @@ function count_clientes_plan_slug(string $slug): int
 /** @return list<array<string, mixed>> */
 function list_mikrotiks_admin(): array
 {
-    $res = db()->query(
-        'SELECT id, nombre, ip, api_port, use_ssl, usuario FROM mikrotiks ORDER BY nombre'
-    );
-    return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+    try {
+        $res = db()->query(
+            'SELECT id, nombre, ip, api_port, use_ssl, usuario, enlace_tipo, notas FROM mikrotiks ORDER BY nombre'
+        );
+        return $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+    } catch (Throwable $e) {
+        $res = db()->query(
+            'SELECT id, nombre, ip, api_port, use_ssl, usuario FROM mikrotiks ORDER BY nombre'
+        );
+        $rows = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
+        foreach ($rows as &$r) {
+            $r['enlace_tipo'] = 'directo';
+            $r['notas'] = null;
+        }
+        unset($r);
+
+        return $rows;
+    }
 }
 
 /** @return array<string, mixed>|null */
