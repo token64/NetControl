@@ -44,7 +44,7 @@ require __DIR__ . '/partials/header.php';
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
     <div>
         <h1 class="h3 mb-0">Routers (MikroTik API)</h1>
-        <p class="text-secondary small mb-0">Alta de equipos para sincronizar PPPoE y colas. <a href="#ayuda-enlaces-mikrotik">Guía: IP alcanzable, CGNAT y VPN</a></p>
+        <p class="text-secondary small mb-0">Alta de equipos para sincronizar PPPoE y colas. Podés <strong>borrar</strong> uno solo si no tiene clientes ni redes IPv4 asignadas (botón en la tabla o al editar la ficha). <a href="#ayuda-enlaces-mikrotik">Guía: IP alcanzable, CGNAT y VPN</a></p>
     </div>
     <a class="btn btn-nc-primary" href="router_edit.php">Nuevo router</a>
 </div>

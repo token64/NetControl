@@ -15,7 +15,29 @@ if ($id > 0 && ! $row) {
 $pageTitle = ($id > 0 ? 'Editar router' : 'Nuevo router') . ' — NetControl';
 $errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_router']) && $id > 0) {
+    if (! csrf_verify()) {
+        flash_set('error', 'Token de seguridad inválido.');
+    } else {
+        $delId = (int) ($_POST['delete_router'] ?? 0);
+        if ($delId !== $id) {
+            flash_set('error', 'Solicitud no válida.');
+        } elseif (count_clientes_mikrotik($id) > 0) {
+            flash_set('error', 'No se puede borrar: hay clientes usando este router. Reasignalos antes.');
+        } elseif (count_redes_mikrotik($id) > 0) {
+            flash_set('error', 'No se puede borrar: eliminá o reasigná las redes IPv4 de este router primero.');
+        } else {
+            $st = db()->prepare('DELETE FROM mikrotiks WHERE id = ?');
+            $st->bind_param('i', $id);
+            $st->execute();
+            flash_set('success', 'Router eliminado.');
+            redirect('routers.php');
+        }
+    }
+    redirect('router_edit.php?id=' . $id);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
     if (! csrf_verify()) {
         $errors[] = 'Token de seguridad inválido.';
     } else {
@@ -93,9 +115,21 @@ if ($row && $_SERVER['REQUEST_METHOD'] === 'POST') {
 $r = $row ?? [];
 $enlaceTipoVal = mikrotik_enlace_normalizado(trim((string) ($r['enlace_tipo'] ?? 'directo')));
 $notasVal = trim((string) ($r['notas'] ?? ''));
+$nClientesMk = $id > 0 ? count_clientes_mikrotik($id) : 0;
+$nRedesMk = $id > 0 ? count_redes_mikrotik($id) : 0;
+$puedeBorrar = $id > 0 && $nClientesMk === 0 && $nRedesMk === 0;
+
+$flash = flash_get();
 
 require __DIR__ . '/partials/header.php';
 ?>
+
+<?php if ($flash): ?>
+    <div class="alert alert-<?= $flash['type'] === 'error' ? 'danger' : 'success' ?> nc-flash alert-dismissible fade show">
+        <?= esc($flash['message']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
 
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
     <div>
@@ -158,11 +192,37 @@ require __DIR__ . '/partials/header.php';
                         <input class="form-control" type="password" name="password" value="" autocomplete="new-password" placeholder="<?= $id > 0 ? 'Dejar vacío para no cambiar' : '' ?>">
                     </div>
                 </div>
-                <div class="mt-4 d-flex gap-2">
+                <div class="mt-4 d-flex flex-wrap gap-2">
                     <button type="submit" class="btn btn-nc-primary">Guardar</button>
                     <a class="btn btn-outline-secondary" href="routers.php">Cancelar</a>
                 </div>
             </form>
+            <?php if ($id > 0): ?>
+                <hr class="border-secondary border-opacity-25 my-4">
+                <h2 class="h6 text-secondary text-uppercase small">Zona de peligro</h2>
+                <?php if ($puedeBorrar): ?>
+                    <p class="small text-secondary mb-2">Eliminar quita el router del panel (no borra nada en el MikroTik).</p>
+                    <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar este router del panel?');">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="delete_router" value="<?= (int) $id ?>">
+                        <button type="submit" class="btn btn-outline-danger">Eliminar router</button>
+                    </form>
+                <?php else: ?>
+                    <?php
+                    $bloqueos = [];
+                    if ($nClientesMk > 0) {
+                        $bloqueos[] = (int) $nClientesMk . ' cliente(s) asignados a este router';
+                    }
+                    if ($nRedesMk > 0) {
+                        $bloqueos[] = (int) $nRedesMk . ' red(es) IPv4 enlazadas';
+                    }
+                    ?>
+                    <p class="small text-warning mb-0">
+                        No se puede eliminar: <strong><?= esc(implode(' y ', $bloqueos)) ?></strong>.
+                        Reasigná o borrá esos datos desde <a href="routers.php" class="link-light">Routers</a>, <a href="index.php" class="link-light">Clientes</a> o <a href="redes.php" class="link-light">Redes IPv4</a>.
+                    </p>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
     </div>
     <div class="col-lg-5">
