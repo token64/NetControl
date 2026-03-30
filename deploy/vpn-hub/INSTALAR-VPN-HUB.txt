@@ -14,19 +14,22 @@ VPN hub (VM 110 «vpn-hub» en Proxmox) — WireGuard
 
    Anotá la «clave pública del servidor» que imprime al final.
 
-4) Firewall
-   - Si hay router delante: reenvío UDP del puerto 51820 (o el que pongas en WG_PORT) hacia la IP de la VM.
-   - En la VM, si usás UFW: el script abre el puerto; revisá forward si bloqueás entre interfaces.
+4) MikroTik borde (tu router WISP)
+   - Resumen: NAT dst-nat UDP 51820 WAN → IP LAN de la VM hub; DHCP lease MAC→IP opcional.
+   - Detalle y comandos: MIKROTIK-BORDE.txt (misma carpeta).
 
-5) MikroTik como cliente WireGuard (RouterOS 7)
+5) Firewall general
+   - Reenvío UDP 51820 hacia la VM; UFW en Ubuntu según prepare-wireguard-hub.sh.
+
+6) MikroTik como cliente WireGuard (RouterOS 7)
    - Interface → WireGuard → + : Name wg-netcontrol, Private Key (generado en el MK: /interface wireguard print keys después de crear).
    - Peer: Public Key = la del servidor (paso 3); Endpoint = IP pública o DDNS de tu casa + puerto 51820; AllowedIPs puede ser 0.0.0.0/0 (ruteo completo) o solo 10.8.0.1/32 según diseño.
    - IP → Addresses: asigná en wg-netcontrol la IP del túnel (ej. 10.8.0.16/24) coherente con lo que registrarás en el hub.
 
-6) Registrar el peer en el servidor
+7) Registrar el peer en el servidor
    sudo bash wg-server-add-peer.sh nombre_router 'CLAVE_PUBLICA_DEL_MIKROTIK' 10.8.0.16/32
 
-7) NetControl
+8) NetControl
    Routers → IP/host = 10.8.0.16 (o la que usó el MK) + usuario/contraseña API.
 
 Nota: MikroWisp en tus capturas usa OpenVPN (tcp 1194). WireGuard es distinto pero mismo rol (hub 10.8.0.x).
@@ -36,3 +39,4 @@ Archivos
 --------
 - prepare-wireguard-hub.sh  — instalación hub
 - wg-server-add-peer.sh     — alta de cada MikroTik / cliente
+- MIKROTIK-BORDE.txt        — NAT 51820, DHCP, ruta 10.8.0.0/24 en el router central

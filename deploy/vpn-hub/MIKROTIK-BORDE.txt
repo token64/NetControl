@@ -1,0 +1,57 @@
+MikroTik borde — rol respecto del hub VPN NetControl (WireGuard)
+===================================================================
+
+Lógica en una frase
+-------------------
+Los routers remotos hacen salida UDP hacia tu IP/DDNS público:51820.
+Tu MikroTik central reenvía ese tráfico a la VM Ubuntu (hub) en la LAN.
+El hub asigna 10.8.0.x al cliente; NetControl usa esa IP para la API.
+
+1) NAT (reenvío de puerto) hacia la VM hub
+------------------------------------------
+IP → Firewall → NAT → Add
+  Chain: dstnat
+  Protocol: udp
+  Dst. port: 51820
+  In. interface: tu WAN pública (ej. sfp-sfpplus2-WAN-1)
+  Action: dst-nat
+  To addresses: IP LAN de la VM (ej. 192.168.13.45)
+  To ports: 51820
+  Comment: WireGuard hub NetControl
+
+Equivalente Terminal (ajustá interfaz e IP):
+
+  /ip firewall nat add chain=dstnat protocol=udp dst-port=51820 in-interface=sfp-sfpplus2-WAN-1 \
+    action=dst-nat to-addresses=192.168.13.45 to-ports=51820 comment="WireGuard hub NetControl"
+
+Si tenés varias WAN: una regla por entrada o usá in-interface-list.
+
+2) DHCP estático (opcional pero recomendado)
+--------------------------------------------
+IP → DHCP Server → Leases → Add
+  MAC: bc:24:11:91:3c:6f  (ejemplo virtio Proxmox; ver en la VM: ip link show ens18)
+  Address: 192.168.13.45
+  Server: el servidor DHCP de esa VLAN/LAN
+
+Sirve para que la VM hub no pierda IP si en algún momento usás DHCP,
+o para marcar en el router qué IP no debe asignar el pool a otros.
+
+3) Ruta hacia 10.8.0.0/24 (si NetControl no ve el túnel)
+---------------------------------------------------------
+El panel PHP debe poder hacer TCP a 10.8.0.x:8728.
+Si el servidor NetControl está en la misma LAN que el MikroTik, a veces
+el propio MK ya enruta la red WireGuard; si no, agregá:
+
+  /ip route add dst-address=10.8.0.0/24 gateway=192.168.13.45 comment="VPN hub WG"
+
+(192.168.13.45 = IP LAN del Linux donde corre wg0; ajustá según tu red.)
+
+4) Firewall
+-----------
+Permití en filter lo que ya permitís para otros servicios; el tráfico nuevo
+es principalmente UDP 51820 a la WAN hacia la VM (dst-nat lo encamina).
+
+5) MikroTik remoto (cliente WireGuard)
+--------------------------------------
+Ver INSTALAR-VPN-HUB.txt: Peer → Endpoint = tu DDNS o IP pública + 51820;
+en el hub registrás el peer con wg-server-add-peer.sh.
