@@ -90,6 +90,7 @@ require __DIR__ . '/partials/header.php';
 <?php elseif ($errorExtra !== null): ?>
     <div class="alert alert-danger nc-flash">
         <strong>Error de conexión o API:</strong> <?= esc($errorExtra) ?>
+        <p class="small mb-0 mt-2"><a class="alert-link" href="routers.php">Ir a Routers</a> y editá el equipo: el fallo usa la IP/host guardada en la base, no una definida por el software.</p>
     </div>
 <?php elseif ($result !== null): ?>
     <?php
