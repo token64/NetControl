@@ -29,6 +29,15 @@ if [[ -f "${DOCROOT}/config.php" ]]; then
   chown root:www-data "${DOCROOT}/config.php"
 fi
 
+# Scripts WireGuard junto a web-panel (misma carpeta deploy/vpn-hub)
+for hub_script in wg-server-add-peer.sh wg-server-remove-peer.sh; do
+  if [[ -f "${SRC_DIR}/${hub_script}" ]]; then
+    install -m 755 "${SRC_DIR}/${hub_script}" "/usr/local/sbin/${hub_script}"
+    chown root:root "/usr/local/sbin/${hub_script}"
+    echo "Instalado /usr/local/sbin/${hub_script}"
+  fi
+done
+
 systemctl enable --now apache2
 systemctl reload apache2
 
@@ -43,4 +52,4 @@ echo "Listo. Abrí en el navegador (reemplazá la IP):"
 echo "  http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo 'IP_DE_LA_VM')/vpn-panel/"
 echo ""
 echo "Siguiente: si aún no existe, sudo cp ${DOCROOT}/config.example.php ${DOCROOT}/config.php"
-echo "y configurá sudoers (ver INSTALAR-VPN-HUB.txt sección 9)."
+echo "y configurá sudoers (add + remove + wg show; ver INSTALAR-VPN-HUB.txt sección 9)."
