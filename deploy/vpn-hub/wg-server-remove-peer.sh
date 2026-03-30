@@ -23,7 +23,7 @@ if [[ ! -f "${CONF}" ]]; then
   exit 1
 fi
 
-if ! grep -q "PublicKey = ${PUB}" "${CONF}"; then
+if ! grep -Fq "PublicKey = ${PUB}" "${CONF}"; then
   echo "No hay ningún peer con esa clave pública en ${CONF}."
   exit 1
 fi

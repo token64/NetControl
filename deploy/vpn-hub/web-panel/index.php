@@ -65,6 +65,14 @@ function valid_peer_name(string $n): bool
     return $n !== '' && (bool) preg_match('/^[a-zA-Z0-9_-]{1,64}$/', $n);
 }
 
+/** Normaliza claves leídas de POST: en x-www-form-urlencoded el '+' suele volverse espacio. */
+function nc_wg_normalize_pubkey_from_post(string $k): string
+{
+    $k = trim($k);
+
+    return str_replace(' ', '+', $k);
+}
+
 function valid_wg_pubkey(string $k): bool
 {
     $k = trim($k);
@@ -267,7 +275,7 @@ if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_peer']
     if (strlen($descripcion) > 240) {
         $descripcion = substr($descripcion, 0, 240);
     }
-    $pub = trim((string) ($_POST['clave_publica'] ?? ''));
+    $pub = nc_wg_normalize_pubkey_from_post((string) ($_POST['clave_publica'] ?? ''));
     $tun = trim((string) ($_POST['tunnel_ip'] ?? '10.64.0.16/32'));
 
     if (! valid_peer_name($nombre)) {
@@ -315,7 +323,7 @@ if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_pee
 }
 
 if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_peer_row'])) {
-    $pubRm = trim((string) ($_POST['peer_pubkey'] ?? ''));
+    $pubRm = nc_wg_normalize_pubkey_from_post((string) ($_POST['peer_pubkey'] ?? ''));
     $wgDump = nc_wg_fetch_dump();
     if (! valid_wg_pubkey($pubRm)) {
         $err = 'Clave inválida.';
@@ -337,7 +345,7 @@ if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_remov
     if (! is_array($selected)) {
         $selected = [];
     }
-    $selected = array_map('trim', array_map('strval', $selected));
+    $selected = array_map(static fn (string $s): string => nc_wg_normalize_pubkey_from_post($s), array_map('strval', $selected));
     $selected = array_filter($selected, static fn (string $s): bool => $s !== '');
     if ($selected === []) {
         $err = 'Marcá al menos un peer para eliminar.';

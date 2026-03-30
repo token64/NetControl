@@ -27,7 +27,7 @@ if [[ ! -f "${CONF}" ]]; then
   exit 1
 fi
 
-if grep -q "PublicKey = ${PUB}" "${CONF}"; then
+if grep -Fq "PublicKey = ${PUB}" "${CONF}"; then
   echo "Esa clave pública ya está en ${CONF}."
   exit 1
 fi
