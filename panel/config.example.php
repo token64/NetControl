@@ -29,7 +29,13 @@ const CRON_SECRET = 'genera_una_clave_larga_aleatoria';
 const INSTALL_TOKEN = 'cambia-esto-antes-de-instalar';
 
 const SMAROLT_API_KEY = '';
+/** @deprecated El mapa usa Leaflet + OpenStreetMap; no hace falta clave. Dejá vacío. */
 const GOOGLE_MAPS_KEY = '';
+
+/** Centro del mapa (mapa.php) cuando no hay clientes con coordenadas o para vista inicial vacía. */
+const MAP_DEFAULT_LAT = 18.5;
+const MAP_DEFAULT_LNG = -69.9;
+const MAP_DEFAULT_ZOOM = 12;
 
 /**
  * Rango respaldo si no eliges “Red IPv4” al crear cliente IP fija.

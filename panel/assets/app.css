@@ -124,7 +124,57 @@
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(30, 205, 178, 0.14);
-  min-height: 520px;
+  min-height: min(70vh, 640px);
+  z-index: 0;
+}
+
+.nc-map-page .nc-map-sidebar {
+  max-height: min(50vh, 420px);
+}
+
+@media (min-width: 992px) {
+  .nc-map-page .nc-map-sidebar {
+    max-height: none;
+    min-height: min(70vh, 640px);
+  }
+}
+
+.nc-map-page .nc-map-list {
+  max-height: min(45vh, 360px);
+}
+
+@media (min-width: 992px) {
+  .nc-map-page .nc-map-list {
+    max-height: calc(min(70vh, 640px) - 3.5rem);
+  }
+}
+
+.nc-map-page .nc-map-list-item .btn-link:hover {
+  color: var(--nc-accent) !important;
+}
+
+.nc-map-page .leaflet-popup-content-wrapper {
+  background: var(--nc-surface);
+  color: var(--nc-text);
+  border-radius: 10px;
+  border: 1px solid rgba(30, 205, 178, 0.2);
+}
+
+.nc-map-page .leaflet-popup-tip {
+  background: var(--nc-surface);
+}
+
+.nc-map-page a.nc-map-popup-link {
+  color: var(--nc-accent);
+  font-weight: 600;
+}
+
+.nc-map-page a.nc-map-popup-link:hover {
+  color: var(--nc-accent-dim);
+}
+
+.nc-map-page .nc-map-stat {
+  font-weight: 500;
 }
 
 .nc-app {

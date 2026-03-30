@@ -2,6 +2,7 @@
 declare(strict_types=1);
 $pageTitle = $pageTitle ?? 'NetControl WISP';
 $navSection = $navSection ?? '';
+$ncHeadExtra = $ncHeadExtra ?? '';
 $__ncCss = dirname(__DIR__) . '/assets/app.css';
 $__ncCssV = is_readable($__ncCss) ? (string) filemtime($__ncCss) : '1';
 ?>
@@ -17,6 +18,7 @@ $__ncCssV = is_readable($__ncCss) ? (string) filemtime($__ncCss) : '1';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="assets/app.css?v=<?= esc($__ncCssV) ?>" rel="stylesheet">
+    <?= $ncHeadExtra ?>
 </head>
 <body class="nc-body">
 <?php if (auth_logged_in()): ?>
