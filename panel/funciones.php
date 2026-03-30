@@ -26,13 +26,8 @@ function mikrotik_connect(int $mikrotikId, int $timeout = 6, int $attempts = 3, 
     $API->delay = $delay;
 
     if (!$API->connect($m['ip'], $m['usuario'], $m['password'])) {
-        $host = (string) $m['ip'];
         $prt = (int) ($m['api_port'] ?: 8728);
-        throw new RuntimeException(
-            'No se pudo conectar a la API en ' . $host . ':' . $prt . '. '
-            . 'Esa dirección es la que cargaste en la ficha del router (Routers → Editar); el panel no impone ninguna IP fija. '
-            . 'Si usás otra VPN o hub, actualizá IP/host y puerto ahí.'
-        );
+        throw new RuntimeException('No se pudo conectar a la API del MikroTik (' . $m['ip'] . ':' . $prt . ').');
     }
 
     return $API;
