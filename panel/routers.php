@@ -80,8 +80,9 @@ require __DIR__ . '/partials/header.php';
                         </td>
                         <td><?= ! empty($r['use_ssl']) ? 'Sí' : 'No' ?></td>
                         <td><?= esc((string) $r['usuario']) ?></td>
-                        <td class="text-end">
+                        <td class="text-end text-nowrap">
                             <a class="btn btn-outline-light btn-sm" href="router_edit.php?id=<?= (int) $r['id'] ?>">Editar</a>
+                            <a class="btn btn-outline-info btn-sm" href="mikrotik_diag.php?id=<?= (int) $r['id'] ?>" title="Abrir diagnóstico API con este router">Probar conexión</a>
                             <?php if (count_clientes_mikrotik((int) $r['id']) === 0 && count_redes_mikrotik((int) $r['id']) === 0): ?>
                                 <form class="d-inline" method="post" action="routers.php" onsubmit="return confirm('¿Eliminar este router?');">
                                     <?= csrf_field() ?>
