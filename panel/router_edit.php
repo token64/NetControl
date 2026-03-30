@@ -27,11 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_router']) && $
         } elseif (count_redes_mikrotik($id) > 0) {
             flash_set('error', 'No se puede borrar: eliminá o reasigná las redes IPv4 de este router primero.');
         } else {
-            $st = db()->prepare('DELETE FROM mikrotiks WHERE id = ?');
-            $st->bind_param('i', $id);
-            $st->execute();
-            flash_set('success', 'Router eliminado.');
-            redirect('routers.php');
+            try {
+                $st = db()->prepare('DELETE FROM mikrotiks WHERE id = ?');
+                $st->bind_param('i', $id);
+                $st->execute();
+                flash_set('success', 'Router eliminado.');
+                redirect('routers.php');
+            } catch (mysqli_sql_exception $e) {
+                flash_set('error', 'No se pudo eliminar: ' . $e->getMessage());
+            }
         }
     }
     redirect('router_edit.php?id=' . $id);
@@ -108,9 +112,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
                     $enlaceTipo,
                     $notas
                 );
-                $st->execute();
-                flash_set('success', 'Router creado. Añadí redes IPv4 en el menú lateral si usás clientes con IP fija.');
-                redirect('routers.php');
+                try {
+                    $st->execute();
+                    flash_set('success', 'Router creado. Añadí redes IPv4 en el menú lateral si usás clientes con IP fija.');
+                    redirect('routers.php');
+                } catch (mysqli_sql_exception $e) {
+                    $errors[] = 'Base de datos: ' . $e->getMessage()
+                        . ' — Si habla de columna desconocida, en el servidor ejecutá sql/migration_mikrotiks_equipo_ubicacion.sql y sql/migration_mikrotiks_enlace_notas.sql.';
+                }
             } else {
                 if ($password !== '') {
                     $st = $db->prepare(
@@ -150,9 +159,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ! isset($_POST['delete_router'])) {
                         $id
                     );
                 }
-                $st->execute();
-                flash_set('success', 'Router actualizado.');
-                redirect('routers.php');
+                try {
+                    $st->execute();
+                    flash_set('success', 'Router actualizado.');
+                    redirect('routers.php');
+                } catch (mysqli_sql_exception $e) {
+                    $errors[] = 'Base de datos: ' . $e->getMessage()
+                        . ' — Si falta una columna en `mikrotiks`, en el servidor ejecutá sql/migration_mikrotiks_equipo_ubicacion.sql y sql/migration_mikrotiks_enlace_notas.sql.';
+                }
             }
         }
     }
