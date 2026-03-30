@@ -69,9 +69,13 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
    - Abrí en el navegador (reemplazá por la IP LAN real de la VM):
      http://IP_DE_LA_VM/vpn-panel/
    - La primera vez: entrá con la contraseña de config.php. NO publiques el panel a Internet sin HTTPS y sin endurecer acceso.
-   - Si el login dice «Contraseña incorrecta»: la cadena debe coincidir al pie de la letra con
-     NC_VPN_PANEL_PASSWORD en config.php (incluye mayúsculas; espacios al pegar pueden fallar).
-     Para ver qué valor usa PHP: php -r "require '/var/www/html/vpn-panel/config.php'; echo NC_VPN_PANEL_PASSWORD, PHP_EOL;"
+   - Si el login dice «Contraseña incorrecta»: la cadena debe coincidir con NC_VPN_PANEL_PASSWORD
+     (mayúsculas; sin espacios de más en config.php ni al pegar).
+     Comprobar: php -r "require '/var/www/html/vpn-panel/config.php'; echo NC_VPN_PANEL_PASSWORD, PHP_EOL;"
+   - Si la contraseña es correcta pero volvés al login sin error: probá ventana privada,
+     borrá cookies del sitio, o actualizá index.php (sesión SameSite Lax + redirect 303).
+     Diagnóstico en la VM: curl -sS -c /tmp/ncj -b /tmp/ncj -d 'login=1&password=TU_CLAVE' -X POST 'http://127.0.0.1/vpn-panel/' -D - -o /tmp/out.html | head -20
+     (debe aparecer HTTP/1.1 303 y en /tmp/out.html el formulario de peers, no solo el login).
    - Para traer cambios del panel desde Git (ej. después de git pull en ~/NetControl):
      sudo cp ~/NetControl/deploy/vpn-hub/web-panel/index.php /var/www/html/vpn-panel/index.php
 

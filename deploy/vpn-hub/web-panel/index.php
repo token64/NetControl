@@ -5,7 +5,15 @@ declare(strict_types=1);
  * La clave del MIKROTIK debe ser la PÚBLICA (Interface → WireGuard → Keys).
  * Nunca subas la clave privada del router al servidor.
  */
-session_start(['cookie_httponly' => true, 'cookie_samesite' => 'Strict']);
+// Lax: con Strict algunos navegadores no envían la cookie en el GET tras el redirect del login.
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => false,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
+session_start();
 
 $configFile = __DIR__ . '/config.php';
 if (! is_readable($configFile)) {
@@ -58,9 +66,12 @@ if (isset($_GET['logout'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $pw = trim((string) ($_POST['password'] ?? ''));
-    if (hash_equals(NC_VPN_PANEL_PASSWORD, $pw)) {
+    $expected = trim((string) NC_VPN_PANEL_PASSWORD);
+    if (hash_equals($expected, $pw)) {
+        session_regenerate_id(true);
         $_SESSION['nc_vpn_panel'] = 1;
-        header('Location: ./');
+        session_write_close();
+        header('Location: ./', true, 303);
         exit;
     }
     $err = 'Contraseña incorrecta.';
