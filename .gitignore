@@ -1,4 +1,5 @@
 panel/config.php
+deploy/vpn-hub/web-panel/config.php
 **/netcontrol-credentials.txt
 .deploy/
 
