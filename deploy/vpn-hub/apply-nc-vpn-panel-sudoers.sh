@@ -17,13 +17,31 @@ fi
 
 ADD_SCRIPT="${ADD_SCRIPT:-/usr/local/sbin/wg-server-add-peer.sh}"
 REMOVE_SCRIPT="${REMOVE_SCRIPT:-/usr/local/sbin/wg-server-remove-peer.sh}"
-WG_BIN="${WG_BIN:-$(command -v wg || true)}"
-if [[ -z "${WG_BIN}" ]]; then
-  WG_BIN=/usr/bin/wg
-fi
 
 # Interfaz por defecto del hub (solo afecta la línea "wg show")
 WG_IF="${WG_IF:-wg0}"
+
+# Rutas al binario wg: varias líneas evitan que falle el match de sudo (PATH/secure_path vs nombre corto).
+collect_wg_paths() {
+  local w rp t
+  declare -A seen=()
+  for t in "$(command -v wg 2>/dev/null || true)" /usr/bin/wg /bin/wg; do
+    [[ -z "${t}" || ! -x "${t}" ]] && continue
+    w="${t}"
+    if rp="$(readlink -f "${w}" 2>/dev/null)" && [[ -n "${rp}" && -x "${rp}" ]]; then
+      w="${rp}"
+    fi
+    if [[ -z "${seen[${w}]:-}" ]]; then
+      seen["${w}"]=1
+      echo "${w}"
+    fi
+  done
+}
+
+mapfile -t _WG_LIST < <(collect_wg_paths)
+if [[ "${#_WG_LIST[@]}" -eq 0 ]]; then
+  _WG_LIST=(/usr/bin/wg)
+fi
 
 TMP="$(mktemp)"
 {
@@ -32,7 +50,10 @@ TMP="$(mktemp)"
   echo "www-data ALL=(root) NOPASSWD: /bin/bash ${ADD_SCRIPT} *"
   echo "www-data ALL=(root) NOPASSWD: /bin/bash ${REMOVE_SCRIPT}"
   echo "www-data ALL=(root) NOPASSWD: /bin/bash ${REMOVE_SCRIPT} *"
-  echo "www-data ALL=(root) NOPASSWD: ${WG_BIN} show ${WG_IF}"
+  for _wg in "${_WG_LIST[@]}"; do
+    echo "www-data ALL=(root) NOPASSWD: ${_wg} show ${WG_IF}"
+    echo "www-data ALL=(root) NOPASSWD: ${_wg} show ${WG_IF} dump"
+  done
 } >"${TMP}"
 
 install -m 0440 -o root -g root "${TMP}" /etc/sudoers.d/nc-vpn-panel
@@ -44,6 +65,7 @@ if ! visudo -c -f /etc/sudoers.d/nc-vpn-panel; then
 fi
 
 echo "OK: /etc/sudoers.d/nc-vpn-panel"
-echo "Probar: sudo -u www-data sudo -n /bin/bash ${REMOVE_SCRIPT}"
+echo "Probar remove: sudo -u www-data sudo -n /bin/bash ${REMOVE_SCRIPT}"
+echo "Probar wg dump: sudo -u www-data sudo -n ${_WG_LIST[0]} show ${WG_IF} dump"
 visudo -c >/dev/null
 echo "visudo -c: OK"
