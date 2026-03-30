@@ -34,6 +34,8 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
 
 7) Registrar el peer en el servidor
    sudo bash wg-server-add-peer.sh nombre_router 'CLAVE_PUBLICA_DEL_MIKROTIK' 10.64.0.16/32
+   Quitar un peer (por la misma clave pública del MikroTik):
+   sudo bash wg-server-remove-peer.sh 'CLAVE_PUBLICA_DEL_MIKROTIK'
 
 8) NetControl
    Routers → IP/host = 10.64.0.16 (o la que usó el MK) + usuario/contraseña API.
@@ -55,11 +57,13 @@ VPN hub — VM Ubuntu + WireGuard (referencia de despliegue)
      sudo cp /var/www/html/vpn-panel/config.example.php /var/www/html/vpn-panel/config.php
      sudo nano /var/www/html/vpn-panel/config.php
        · NC_VPN_PANEL_PASSWORD = contraseña larga
-       · WG_ADD_PEER_SCRIPT = ruta absoluta a wg-server-add-peer.sh (ej. /home/jose/vpn-hub/wg-server-add-peer.sh)
-   - Sudo solo para el script y wg show (ajustá la ruta del .sh):
-     sudo install -m 440 /dev/null /etc/sudoers.d/nc-vpn-panel
-     sudo nano /etc/sudoers.d/nc-vpn-panel
-       www-data ALL=(root) NOPASSWD: /bin/bash /home/jose/vpn-hub/wg-server-add-peer.sh
+       · WG_ADD_PEER_SCRIPT y WG_REMOVE_PEER_SCRIPT — típico tras copiar scripts a /usr/local/sbin/
+   - Copiar scripts al PATH de root (recomendado; www-data no lee /home):
+     sudo install -m 755 ~/NetControl/deploy/vpn-hub/wg-server-add-peer.sh /usr/local/sbin/
+     sudo install -m 755 ~/NetControl/deploy/vpn-hub/wg-server-remove-peer.sh /usr/local/sbin/
+   - Sudo para el panel (visudo -f /etc/sudoers.d/nc-vpn-panel; chmod 0440). Los comandos llevan * para permitir argumentos.
+       www-data ALL=(root) NOPASSWD: /bin/bash /usr/local/sbin/wg-server-add-peer.sh *
+       www-data ALL=(root) NOPASSWD: /bin/bash /usr/local/sbin/wg-server-remove-peer.sh *
        www-data ALL=(root) NOPASSWD: /usr/bin/wg show wg0
      (Si wg está en otra ruta: which wg)
    - Si usás UFW y querés HTTP desde la LAN:
@@ -86,6 +90,7 @@ Archivos
 --------
 - prepare-wireguard-hub.sh  — instalación hub
 - wg-server-add-peer.sh     — alta de cada MikroTik / cliente
-- web-panel/                — panel PHP (nombre, descripción, clave pública, IP túnel)
+- wg-server-remove-peer.sh  — baja por clave pública
+- web-panel/                — panel PHP (alta y baja de peers)
 - install-web-panel-apache.sh — instala Apache+PHP y publica /vpn-panel/ en la VM
 - MIKROTIK-BORDE.txt        — NAT 51820, DHCP, ruta 10.64.0.0/24 en el router central

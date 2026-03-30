@@ -23,6 +23,10 @@ if (! is_readable($configFile)) {
 }
 require_once $configFile;
 
+if (! defined('WG_REMOVE_PEER_SCRIPT')) {
+    define('WG_REMOVE_PEER_SCRIPT', dirname(WG_ADD_PEER_SCRIPT) . '/wg-server-remove-peer.sh');
+}
+
 function h(?string $s): string
 {
     return htmlspecialchars((string) $s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -114,6 +118,27 @@ if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_peer']
     }
 }
 
+if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_peer'])) {
+    $pubRm = trim((string) ($_POST['clave_publica_quitar'] ?? ''));
+    if (! valid_wg_pubkey($pubRm)) {
+        $err = 'Para quitar: pegá la misma clave pública del peer que figura en el error o en wg show.';
+    } elseif (! is_readable(WG_REMOVE_PEER_SCRIPT)) {
+        $err = 'No existe o no se puede leer: ' . WG_REMOVE_PEER_SCRIPT;
+    } else {
+        $rm = realpath(WG_REMOVE_PEER_SCRIPT) ?: WG_REMOVE_PEER_SCRIPT;
+        $cmdRm = sprintf(
+            'sudo -n /bin/bash %s %s 2>&1',
+            escapeshellarg($rm),
+            escapeshellarg($pubRm)
+        );
+        exec($cmdRm, $linesRm, $codeRm);
+        $out = implode("\n", $linesRm);
+        if ($codeRm !== 0) {
+            $err = 'El script de baja devolvió error. Revisá la salida abajo.';
+        }
+    }
+}
+
 if ($authed) {
     $status = '';
     exec('sudo -n wg show ' . escapeshellarg(WG_INTERFACE) . ' 2>&1', $wgLines, $wgCode);
@@ -182,6 +207,16 @@ header('Content-Type: text/html; charset=utf-8');
                 <label>IP en el túnel (10.64.0.2–254 con /32; el .1 es el hub)</label>
                 <input name="tunnel_ip" value="<?= h((string) ($_POST['tunnel_ip'] ?? '10.64.0.16/32')) ?>" placeholder="10.64.0.16/32" required>
                 <button type="submit">Agregar peer</button>
+            </form>
+        </div>
+        <div class="card">
+            <h2 class="h6" style="margin:0 0 .75rem;color:var(--muted);font-weight:600">Quitar peer</h2>
+            <p class="sub" style="margin-top:0">Borra el bloque <code>[Peer]</code> de <code>/etc/wireguard/<?= h(WG_INTERFACE) ?>.conf</code> por su <strong>clave pública</strong> (la del MikroTik). Luego recarga WireGuard.</p>
+            <form method="post">
+                <input type="hidden" name="remove_peer" value="1">
+                <label>Clave pública del peer a eliminar</label>
+                <input name="clave_publica_quitar" required autocomplete="off" placeholder="La misma que usaste al dar de alta" value="<?= h((string) ($_POST['clave_publica_quitar'] ?? '')) ?>">
+                <button type="submit" style="background:#c65d5d;color:#fff">Eliminar peer</button>
             </form>
         </div>
         <?php if ($out !== ''): ?>
