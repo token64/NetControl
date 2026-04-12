@@ -1,0 +1,49 @@
+# =============================================================================
+# Despliegue automático SIN que tengas que SSH a la VM en cada cambio
+# =============================================================================
+#
+# Cursor / la nube NO pueden entrar a tu 192.168.x.x. La forma estable es:
+#
+# 1) En GitHub: Repo → Settings → Actions → Runners → "New self-hosted runner"
+#    Elegí Linux x64. Copiá los comandos que te muestra y ejecutalos UNA vez
+#    en la VM (como usuario dedicado o como jose; según la guía de GitHub).
+#
+# 2) Al configurar el runner, podés darle etiqueta "netcontrol" y entonces
+#    cambiá abajo runs-on a: [self-hosted, netcontrol]
+#
+# 3) Repo → Settings → Secrets and variables → Actions → Variables → New
+#    nombre: DEPLOY_SELF_HOSTED   valor: true
+#    (Sin esto el job se salta y no molesta hasta que tengas runner.)
+#
+# 4) En la VM, el usuario del runner necesita sudo sin contraseña para:
+#      chown (sobre /var/www/NetControl/panel) y systemctl reload apache2
+#    Ejemplo (ajustá el usuario del runner, mirá: ps aux | grep Runner):
+#      echo 'RUNNER_USER ALL=(ALL) NOPASSWD:/usr/bin/chown,/bin/chown,/usr/bin/systemctl' | sudo tee /etc/sudoers.d/netcontrol-deploy
+#
+# El repo en la VM debe ser clone de este origin y ruta /var/www/NetControl
+# =============================================================================
+
+name: Deploy (VM self-hosted)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  pull-on-vm:
+    if: vars.DEPLOY_SELF_HOSTED == 'true'
+    runs-on: self-hosted
+    timeout-minutes: 15
+    steps:
+      - name: Actualizar código y Apache
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /var/www/NetControl
+          git config --global --add safe.directory /var/www/NetControl || true
+          git fetch origin main
+          git reset --hard origin/main
+          sudo chown -R www-data:www-data panel
+          sudo systemctl reload apache2
