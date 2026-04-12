@@ -81,6 +81,26 @@ body.nc-adminlte .app-content .btn-nc-primary {
   color: #fff;
 }
 
+/* Geolocalización y outline en .nc-card: forzar contraste (evita texto casi blanco) */
+body.nc-adminlte .app-content .nc-card [data-nc-geobtn],
+body.nc-adminlte .app-content .nc-card #btnGeo {
+  color: #212529 !important;
+  border-color: #6c757d !important;
+  background-color: #fff !important;
+}
+
+body.nc-adminlte .app-content .nc-card [data-nc-geobtn]:hover,
+body.nc-adminlte .app-content .nc-card #btnGeo:hover {
+  color: #fff !important;
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+}
+
+body.nc-adminlte .app-content .nc-card [data-nc-geobtn] .bi,
+body.nc-adminlte .app-content .nc-card #btnGeo .bi {
+  color: inherit !important;
+}
+
 /* Botones pensados para fondo oscuro (outline-light) → legibles en tema claro */
 body.nc-adminlte .app-content .btn-outline-light {
   color: var(--bs-body-color);
