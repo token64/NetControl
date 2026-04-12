@@ -40,11 +40,15 @@ Contenedor NetControl (panel WISP, este repo)
 
 Subir la copia local (Windows / XAMPP) al CT o VM
 -------------------------------------------------
-- Recomendado a largo plazo: en tu PC `git commit` + `git push`; en el servidor `git pull` (o server-git-pull.sh).
-- Rápido sin empujar a GitHub: desde PowerShell en la raíz del repo:
+- **Local = fuente de verdad → Proxmox (VM panel):** desde la raíz del repo:
+    .\deploy\sync-to-proxmox-netcontrol.ps1
+  Equivale a `sync-local-to-remote.ps1` con host por defecto 192.168.13.50 (VM «NetControls»).
+  Requiere `scp`/`ssh` sin contraseña en cada paso (clave SSH) o aceptar los prompts.
+- Misma herramienta con IP/usuario a mano:
     .\deploy\sync-local-to-remote.ps1 -RemoteHost IP_DEL_CT_O_VM -RemoteUser jose
-  Por defecto NO pisa `panel/config.php` del servidor (usá `-IncludePanelConfig` solo si querés copiar también el tuyo).
-  Requiere scp/ssh y sudo en el remoto.
+- Recomendado a largo plazo: en tu PC `git commit` + `git push`; en el servidor `git pull` (o server-git-pull.sh) o `.\deploy\proxmox-vm-guest-git-deploy.ps1` (solo lo que esté en GitHub).
+- Por defecto NO pisa `panel/config.php` del servidor (usá `-IncludePanelConfig` solo si querés copiar también el tuyo).
+  Requiere sudo en el remoto para extraer bajo `/var/www/NetControl`.
 
 Migraciones SQL adicionales (ej. finanzas)
 ------------------------------------------
