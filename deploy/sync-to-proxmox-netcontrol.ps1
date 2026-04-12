@@ -4,6 +4,9 @@
   Sincroniza tu copia local de NetControl hacia la VM del panel en Proxmox (local = fuente de verdad).
 
 .DESCRIPTION
+  Flujo habitual del proyecto: `.\deploy\publish-github-then-proxmox-vm.ps1` (git push + actualización
+  por API Proxmox). Este script es la alternativa por SSH/tar cuando no querés pasar por GitHub.
+
   No hace pull desde el servidor: empaqueta el árbol local (tar), lo sube por SSH y lo extrae en
   /var/www/NetControl. Por defecto NO sobrescribe panel/config.php del remoto.
 

@@ -62,7 +62,7 @@ try {
             $code = $st.data.exitcode
             if ($code -ne 0) { throw "Comando en el invitado terminó con exitcode=$code" }
             Write-Host "Listo."
-            exit 0
+            return
         }
     }
     throw "Timeout esperando exec-status para pid=$guestPid"

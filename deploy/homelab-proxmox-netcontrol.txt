@@ -38,17 +38,22 @@ Contenedor NetControl (panel WISP, este repo)
 - Si git pull choca con cambios locales: deploy/reset-to-origin-main.sh (hace backup de config.php)
 - Sin git: deploy/download-panel-from-github.sh
 
-Subir la copia local (Windows / XAMPP) al CT o VM
--------------------------------------------------
-- **Local = fuente de verdad → Proxmox (VM panel):** desde la raíz del repo:
-    .\deploy\sync-to-proxmox-netcontrol.ps1
-  Equivale a `sync-local-to-remote.ps1` con host por defecto 192.168.13.50 (VM «NetControls»).
-  Requiere `scp`/`ssh` sin contraseña en cada paso (clave SSH) o aceptar los prompts.
-- Misma herramienta con IP/usuario a mano:
-    .\deploy\sync-local-to-remote.ps1 -RemoteHost IP_DEL_CT_O_VM -RemoteUser jose
-- Recomendado a largo plazo: en tu PC `git commit` + `git push`; en el servidor `git pull` (o server-git-pull.sh) o `.\deploy\proxmox-vm-guest-git-deploy.ps1` (solo lo que esté en GitHub).
-- Por defecto NO pisa `panel/config.php` del servidor (usá `-IncludePanelConfig` solo si querés copiar también el tuyo).
-  Requiere sudo en el remoto para extraer bajo `/var/www/NetControl`.
+Flujo recomendado (Windows): GitHub + VM siempre alineados con lo versionado
+------------------------------------------------------------------------------
+Desde la raíz del repo en tu PC:
+    .\deploy\publish-github-then-proxmox-vm.ps1
+  Hace `git push` de la rama actual y luego, vía API Proxmox (QEMU guest agent en vmid 109),
+  `git fetch` + `reset --hard origin/<rama>` en /var/www/NetControl. Requiere
+  `%USERPROFILE%\.cursor\proxmox.credentials.json` y token con permiso de agente en esa VM.
+  Sin SSH a la VM. Si solo querés refrescar la VM desde GitHub ya empujado:
+    .\deploy\publish-github-then-proxmox-vm.ps1 -SkipGitPush
+  Solo actualizar la VM (un paso): `.\deploy\proxmox-vm-guest-git-deploy.ps1`
+
+Subir la copia local (Windows / XAMPP) sin pasar por GitHub (excepcional)
+-------------------------------------------------------------------------
+- Tar por SSH (local pisando el árbol en el servidor): `.\deploy\sync-to-proxmox-netcontrol.ps1`
+  o `.\deploy\sync-local-to-remote.ps1 -RemoteHost ...` (por defecto NO pisa `panel/config.php`).
+  Requiere scp/ssh; no sustituye al flujo GitHub + Proxmox de arriba si querés historial en el repo.
 
 Migraciones SQL adicionales (ej. finanzas)
 ------------------------------------------
