@@ -1,7 +1,7 @@
 <?php
 /**
  * Copiar este archivo como config.php y completar valores.
- * Contraseña panel por defecto en ejemplo: CambiarClave123!
+ * Ejemplo de acceso panel: usuario jose · contraseña 123456aaa (cambiá en producción).
  * Generar hash: php -r "echo password_hash('tu_clave', PASSWORD_DEFAULT);"
  */
 declare(strict_types=1);
@@ -13,11 +13,11 @@ const DB_PASS = '';
 const DB_NAME = 'panel_wisp';
 
 /** Usuario del panel (login web) */
-const ADMIN_USER = 'admin';
+const ADMIN_USER = 'jose';
 /** Nombre visible en el dashboard (sidebar). Opcional; si vacío se usa ADMIN_USER. */
 const ADMIN_DISPLAY_NAME = '';
 /** Sustituir por hash propio (nunca guardar contraseña en texto plano) */
-const ADMIN_PASSWORD_HASH = '$2y$10$d6tQmUT14HsaA34bd3.EteyxjZJSV/i7AvePtHuWwnIeVkR2nyG7G';
+const ADMIN_PASSWORD_HASH = '$2y$10$.kG968GsO5KXMZnvkaaiL.vM.FJczDWdxikIs.6ZrK3Xm7xLQcEBi';
 
 /**
  * Clave para auto_corte.php vía cron (?key=...)
@@ -42,5 +42,30 @@ const MAP_DEFAULT_ZOOM = 12;
  * Preferí crear redes en el menú Redes IPv4 (tabla `redes`).
  */
 const IP_POOL_DEFAULT = '192.168.10.2-192.168.10.254';
+
+/**
+ * Rellenar nombre desde una API HTTP al pulsar «Buscar» junto a la cédula (crear / editar cliente).
+ * Los datos suelen venir del registro de contribuyentes (DGII u otro proveedor), no de la JCE.
+ * Plantilla: un solo %s = cédula con 11 dígitos (se normaliza en el servidor).
+ * Ejemplo (terceros, sujeto a sus términos): https://rnc.megaplus.com.do/api/consulta?rnc=%s
+ * Si ves bloqueo tipo Imunify360: no es el JavaScript; es la IP desde la que tu PHP sale a Internet.
+ * Otro panel que “funciona” suele llamar a su propio PHP en el hosting (misma idea que `api_cedula_nombre.php` aquí).
+ */
+const CEDULA_LOOKUP_ENABLED = false;
+const CEDULA_LOOKUP_URL_TEMPLATE = '';
+/** Texto mostrado en pantalla, ej. "DGII (contribuyente)". */
+const CEDULA_LOOKUP_ETIQUETA_FUENTE = 'DGII (contribuyente)';
+/**
+ * Si true, cURL no verifica certificado SSL al consultar (solo para diagnóstico / XAMPP con CA rota).
+ * En producción dejá false.
+ */
+const CEDULA_LOOKUP_INSECURE_SSL = false;
+/**
+ * Si la IP del servidor está bloqueada (Imunify) y tenés un proxy HTTP saliente permitido:
+ * ej. http://127.0.0.1:8888 o tcp://proxy.isp.com:3128 (según lo que acepte tu cURL).
+ */
+const CEDULA_LOOKUP_HTTP_PROXY = '';
+/** Opcional: usuario:contraseña del proxy (Basic). */
+const CEDULA_LOOKUP_HTTP_PROXY_USERPWD = '';
 
 /** Si tu config.php antiguo define plan_limits(), bórrala: ahora viene de BD (includes/registry.php). */

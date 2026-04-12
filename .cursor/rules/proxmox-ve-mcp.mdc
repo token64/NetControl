@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## Dónde está la verdad (no pedir al usuario que lo repita)
 
-- **API / red:** `https://192.168.13.215:8006` — PVE 8.x, nodo suele llamarse `proxmox`.
+- **API / red:** `https://192.168.13.215:8006` — **PVE 9.x** en instalaciones al día (2025–2026); aún puede haber nodos en 8.4. Nodo suele llamarse `proxmox`. Actualizar el hipervisor: en el **nodo** (SSH o Shell web), repositorios correctos y `apt update && apt full-upgrade`; salto mayor 8→9: [Upgrade from 8 to 9](https://pve.proxmox.com/wiki/Upgrade_from_8_to_9).
 - **Token API (ID):** `root@pam!cursor-mcp` (usuario `root@pam`, token `cursor-mcp`, comentario “conexión con cursor”). El **secreto** no se escribe en el chat; vive solo en archivos locales (ver MCP abajo) y debe alinearse al rotar el token en PVE.
 
 ## MCP en Cursor (dos formas válidas; usá una)

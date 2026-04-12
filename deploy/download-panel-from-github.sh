@@ -21,4 +21,4 @@ echo "Copiando a ${TARGET}/panel …"
 cp -a "$SRC"/* "$TARGET/panel/"
 chown -R www-data:www-data "$TARGET/panel"
 systemctl reload apache2
-echo "Listo. Comprobar en el navegador: …/netcontrol/nc_version.php (debe mostrar nc_panel_ui_rev=2)"
+echo "Listo. Comprobar en el navegador: …/netcontrol/nc_version.php (debe mostrar nc_panel_ui_rev=3)"

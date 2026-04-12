@@ -113,13 +113,6 @@ foreach ($routerStatus as $st) {
 }
 $routersDown = max(0, $routersTotal - $routersOk);
 
-$kpiPctActivos = $counts['total'] > 0
-    ? (int) round(100 * $counts['activos'] / $counts['total'])
-    : 0;
-$kpiPctRouters = $routersTotal > 0
-    ? (int) round(100 * $routersOk / $routersTotal)
-    : 0;
-
 $cobradoHoy = nc_pagos_total_hoy();
 
 require __DIR__ . '/partials/header.php';
@@ -134,59 +127,53 @@ require __DIR__ . '/partials/header.php';
 
 <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
     <div>
-        <h1 class="h4 mb-1">Panel operador</h1>
         <p class="text-secondary small mb-0">Resumen operativo: clientes, cobros en ventana, vencidos y routers. <span class="opacity-75">· UI rev <?= (int) NC_PANEL_UI_REV ?></span></p>
     </div>
     <div class="d-flex flex-wrap gap-2">
-        <a class="btn btn-nc-primary btn-sm" href="crear.php"><i class="bi bi-person-plus me-1"></i>Nuevo cliente</a>
+        <a class="btn btn-primary btn-sm" href="crear.php"><i class="bi bi-person-plus me-1"></i>Nuevo cliente</a>
         <a class="btn btn-outline-secondary btn-sm" href="index.php">Lista completa</a>
     </div>
 </div>
 
 <div class="row g-3 mb-4">
-    <div class="col-12 col-md-6 col-xl-3">
-        <div class="nc-kpi-card nc-kpi-card--teal h-100">
-            <div class="nc-kpi-label">Clientes activos</div>
-            <div class="nc-kpi-value"><?= (int) $counts['activos'] ?></div>
-            <div class="nc-kpi-meta">Registrados en cartera: <?= (int) $counts['total'] ?></div>
-            <div class="progress">
-                <div class="progress-bar bg-white opacity-75" style="width: <?= $kpiPctActivos ?>%"></div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-primary">
+            <div class="inner">
+                <h3><?= (int) $counts['activos'] ?></h3>
+                <p>Clientes activos</p>
             </div>
-            <a class="nc-kpi-link" href="index.php">Ver lista de clientes</a>
+            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM3.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM19.75 7.5a.75.75 0 00-1.5 0v2.25H16a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H22a.75.75 0 000-1.5h-2.25V7.5z"/></svg>
+            <a href="index.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">Cartera: <?= (int) $counts['total'] ?> · Ver lista <i class="bi bi-link-45deg"></i></a>
         </div>
     </div>
-    <div class="col-12 col-md-6 col-xl-3">
-        <div class="nc-kpi-card nc-kpi-card--blue h-100">
-            <div class="nc-kpi-label">Ventana de cobro (7 días)</div>
-            <div class="nc-kpi-value"><?= $proximos7Count ?></div>
-            <div class="nc-kpi-meta">Pagos programados en la próxima semana · Promesas vigentes: <?= $promesasActivas ?></div>
-            <div class="nc-kpi-meta mt-1" style="font-size:0.78rem;">Cobrado hoy (registrado): <strong><?= esc(number_format($cobradoHoy, 2, '.', ',')) ?></strong> total monedas mezcladas</div>
-            <div class="progress">
-                <div class="progress-bar bg-white opacity-75" style="width: <?= $counts['activos'] > 0 ? min(100, (int) round(100 * $proximos7Count / max(1, $counts['activos']))) : 0 ?>%"></div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-success">
+            <div class="inner">
+                <h3><?= $proximos7Count ?></h3>
+                <p>Cobros en 7 días</p>
             </div>
-            <a class="nc-kpi-link" href="finanzas_transacciones.php">Ver transacciones</a>
+            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            <a href="finanzas_transacciones.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">Promesas: <?= $promesasActivas ?> · Hoy <?= esc(number_format($cobradoHoy, 2, '.', ',')) ?> <i class="bi bi-link-45deg"></i></a>
         </div>
     </div>
-    <div class="col-12 col-md-6 col-xl-3">
-        <div class="nc-kpi-card nc-kpi-card--violet h-100">
-            <div class="nc-kpi-label">Pagos vencidos (activos)</div>
-            <div class="nc-kpi-value"><?= $vencidosCount ?></div>
-            <div class="nc-kpi-meta">Clientes con fecha de pago &lt; hoy · Requiere seguimiento</div>
-            <div class="progress">
-                <div class="progress-bar bg-danger opacity-90" style="width: <?= $counts['activos'] > 0 ? min(100, (int) round(100 * $vencidosCount / max(1, $counts['activos']))) : 0 ?>%"></div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-warning">
+            <div class="inner">
+                <h3><?= $vencidosCount ?></h3>
+                <p>Pagos vencidos</p>
             </div>
-            <a class="nc-kpi-link" href="finanzas.php">Ver finanzas / vencidos</a>
+            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            <a href="finanzas.php" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">Activos con fecha &lt; hoy <i class="bi bi-link-45deg"></i></a>
         </div>
     </div>
-    <div class="col-12 col-md-6 col-xl-3">
-        <div class="nc-kpi-card nc-kpi-card--slate h-100">
-            <div class="nc-kpi-label">Routers — API</div>
-            <div class="nc-kpi-value"><?= $routersOk ?><span class="fs-5 fw-semibold opacity-75"> / <?= $routersTotal ?></span></div>
-            <div class="nc-kpi-meta"><?= $routersDown ?> sin respuesta API · Diagnóstico detallado disponible</div>
-            <div class="progress">
-                <div class="progress-bar bg-success opacity-90" style="width: <?= $kpiPctRouters ?>%"></div>
+    <div class="col-lg-3 col-6">
+        <div class="small-box text-bg-danger">
+            <div class="inner">
+                <h3><?= $routersOk ?><span class="fs-4">/</span><?= $routersTotal ?></h3>
+                <p>Routers API OK</p>
             </div>
-            <a class="nc-kpi-link" href="mikrotik_diag.php">Ver diagnóstico API</a>
+            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            <a href="mikrotik_diag.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover"><?= $routersDown ?> sin API <i class="bi bi-link-45deg"></i></a>
         </div>
     </div>
 </div>
@@ -359,8 +346,8 @@ require __DIR__ . '/partials/header.php';
           {
             label: 'Altas',
             data: dataAltas,
-            borderColor: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.14)',
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.12)',
             fill: true,
             tension: 0.35,
             pointRadius: 3,
@@ -375,13 +362,13 @@ require __DIR__ . '/partials/header.php';
         },
         scales: {
           x: {
-            grid: { color: 'rgba(124, 143, 163, 0.12)' },
-            ticks: { color: '#8fa3b8', maxRotation: 0 },
+            grid: { color: 'rgba(0, 0, 0, 0.06)' },
+            ticks: { color: '#6c757d', maxRotation: 0 },
           },
           y: {
             beginAtZero: true,
-            grid: { color: 'rgba(124, 143, 163, 0.12)' },
-            ticks: { color: '#8fa3b8', precision: 0 },
+            grid: { color: 'rgba(0, 0, 0, 0.06)' },
+            ticks: { color: '#6c757d', precision: 0 },
           },
         },
       },
@@ -396,7 +383,7 @@ require __DIR__ . '/partials/header.php';
         labels: ['Activos', 'Suspendidos'],
         datasets: [{
           data: [activos, suspendidos],
-          backgroundColor: ['#1ecdb2', 'rgba(232, 179, 57, 0.88)'],
+          backgroundColor: ['#198754', '#ffc107'],
           borderWidth: 0,
         }],
       },
@@ -407,7 +394,7 @@ require __DIR__ . '/partials/header.php';
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { color: '#8fa3b8', boxWidth: 12 },
+            labels: { color: '#6c757d', boxWidth: 12 },
           },
         },
       },

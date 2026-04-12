@@ -1,0 +1,98 @@
+/* NetControl + AdminLTE v4 — ajustes sobre tema claro del layout */
+body.nc-adminlte.layout-fixed {
+  font-family: "Source Sans 3", system-ui, -apple-system, sans-serif;
+}
+
+body.nc-adminlte .brand-text,
+body.nc-adminlte .app-header .nav-link {
+  font-family: inherit;
+}
+
+body.nc-adminlte .nc-brand {
+  font-weight: 700;
+  color: var(--bs-primary) !important;
+}
+
+body.nc-adminlte .nc-quicknav {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-border-color) !important;
+}
+
+body.nc-adminlte .nc-quicknav .nc-qnav-link {
+  color: var(--bs-secondary);
+  text-decoration: none;
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.45rem;
+}
+
+body.nc-adminlte .nc-quicknav .nc-qnav-link:hover {
+  background: var(--bs-secondary-bg);
+  color: var(--bs-body-color);
+}
+
+body.nc-adminlte .nc-quicknav .nc-qnav-link.active {
+  background: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+
+/* Tablas y tarjetas heredadas del tema oscuro → legibles en app-content claro */
+body.nc-adminlte .app-content .nc-card {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-body-color);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+body.nc-adminlte .app-content .table.nc-table {
+  --bs-table-color: var(--bs-body-color);
+  --bs-table-border-color: var(--bs-border-color);
+}
+
+body.nc-adminlte .app-content .nc-dash-widget {
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  color: var(--bs-body-color);
+  box-shadow: var(--bs-box-shadow-sm);
+  border-radius: 0.375rem;
+}
+
+body.nc-adminlte .app-content .nc-dash-widget-h {
+  color: var(--bs-body-color);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+body.nc-adminlte .app-content .nc-sys-row span:first-child {
+  color: var(--bs-secondary);
+}
+
+body.nc-adminlte .app-content .nc-mini-table {
+  color: var(--bs-body-color);
+}
+
+body.nc-adminlte .app-content .form-control,
+body.nc-adminlte .app-content .form-select {
+  background: var(--bs-body-bg);
+  border-color: var(--bs-border-color);
+  color: var(--bs-body-color);
+}
+
+body.nc-adminlte .app-content .btn-nc-primary {
+  color: #fff;
+}
+
+body.nc-adminlte .app-sidebar .nav-link.active {
+  font-weight: 600;
+}
+
+body.nc-adminlte .app-content .nc-pill-activo {
+  background: rgba(25, 135, 84, 0.12);
+  color: #0f5132;
+  border: 1px solid rgba(25, 135, 84, 0.35);
+}
+
+body.nc-adminlte .app-content .nc-pill-susp {
+  background: rgba(220, 53, 69, 0.1);
+  color: #842029;
+  border: 1px solid rgba(220, 53, 69, 0.35);
+}

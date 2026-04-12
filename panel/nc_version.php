@@ -2,7 +2,7 @@
 declare(strict_types=1);
 /**
  * Sin login: comprobar desde el navegador si el CT sirve código nuevo.
- * Ej.: http://IP/netcontrol/nc_version.php  →  esperado nc_panel_ui_rev=2
+ * Ej.: http://IP/netcontrol/nc_version.php  →  esperado nc_panel_ui_rev=3
  */
 require_once __DIR__ . '/includes/nc_build.php';
 header('Content-Type: text/plain; charset=utf-8');

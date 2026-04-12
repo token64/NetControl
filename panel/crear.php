@@ -4,7 +4,9 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
 require_once __DIR__ . '/funciones.php';
+require_once __DIR__ . '/includes/cedula_lookup.php';
 
+$ncCedulaLookup = nc_cedula_lookup_enabled();
 $navSection = 'clientes-crear';
 $pageTitle = 'Nuevo cliente — NetControl';
 $errors = [];
@@ -177,12 +179,25 @@ require __DIR__ . '/partials/header.php';
                 <?= csrf_field() ?>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Nombre</label>
-                        <input class="form-control" name="nombre" required value="<?= esc((string) ($_POST['nombre'] ?? '')) ?>">
+                        <label class="form-label d-flex align-items-center gap-2 flex-wrap">
+                            Nombre
+                            <?php if ($ncCedulaLookup): ?>
+                                <span id="ncNombreFuente" class="badge rounded-pill text-bg-light border small fw-normal" style="display:none;"></span>
+                            <?php endif; ?>
+                        </label>
+                        <input class="form-control" name="nombre"<?= $ncCedulaLookup ? ' id="nc_nombre"' : '' ?> required value="<?= esc((string) ($_POST['nombre'] ?? '')) ?>">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Cédula / ID</label>
-                        <input class="form-control" name="cedula" value="<?= esc((string) ($_POST['cedula'] ?? '')) ?>">
+                        <?php if ($ncCedulaLookup): ?>
+                            <div class="input-group" data-nc-cedula-root data-endpoint="api_cedula_nombre.php" data-cedula="#nc_cedula" data-nombre="#nc_nombre" data-msg="#ncCedulaMsg" data-fuente="#ncNombreFuente">
+                                <input class="form-control" name="cedula" id="nc_cedula" inputmode="numeric" autocomplete="off" placeholder="11 dígitos" value="<?= esc((string) ($_POST['cedula'] ?? '')) ?>">
+                                <button type="button" class="btn btn-outline-secondary" data-nc-cedula-btn title="Consultar nombre según registro configurado">Obtener datos</button>
+                            </div>
+                            <span id="ncCedulaMsg" class="small text-secondary d-block mt-1" role="status"></span>
+                        <?php else: ?>
+                            <input class="form-control" name="cedula" value="<?= esc((string) ($_POST['cedula'] ?? '')) ?>">
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Teléfono</label>
@@ -317,5 +332,12 @@ require __DIR__ . '/partials/header.php';
   syncTipo();
 })();
 </script>
+<?php if ($ncCedulaLookup): ?>
+    <?php
+    $__ncCed = __DIR__ . '/assets/nc-cedula-nombre.js';
+    $__ncCedV = is_readable($__ncCed) ? (string) filemtime($__ncCed) : '1';
+    ?>
+    <script src="assets/nc-cedula-nombre.js?v=<?= esc($__ncCedV) ?>"></script>
+<?php endif; ?>
 
 <?php require __DIR__ . '/partials/footer.php'; ?>

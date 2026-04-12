@@ -20,4 +20,4 @@ git reset --hard origin/main
 
 chown -R www-data:www-data "$TARGET/panel"
 systemctl reload apache2
-echo "Listo: igual que origin/main. Probar: http://<IP>/netcontrol/nc_version.php (nc_panel_ui_rev=2)"
+echo "Listo: igual que origin/main. Probar: http://<IP>/netcontrol/nc_version.php (nc_panel_ui_rev=3)"

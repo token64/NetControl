@@ -4,6 +4,7 @@ NetControl + Proxmox (homelab) — referencia rápida
 
 Proxmox VE (hipervisor)
 -----------------------
+- Versión de referencia (2026): PVE 9.1.x estable; nodos antiguos pueden seguir en 8.4 hasta migrar.
 - API HTTPS: https://192.168.13.215:8006
 - Nodo habitual: proxmox
 - Token API (solo el ID público): root@pam!cursor-mcp
@@ -17,17 +18,33 @@ A) stdio: npx @bldg-7/proxmox-mcp + variables en .cursor/mcp.json
 B) SSE: levantar ProxmoxMCP-Plus-Official (puerto 8811) + url http://127.0.0.1:8811/sse en mcp.json
    Docs: http://localhost:8811/docs  |  Salud: http://127.0.0.1:8811/health
 
+Actualizar Proxmox VE en el nodo (no desde este repo)
+------------------------------------------------------
+- Backup / ventana de mantenimiento; leer notas de la versión destino.
+- Misma major (p. ej. 9.0 -> 9.1): en el nodo como root, repos bien configurados luego:
+    apt update && apt full-upgrade
+- Salto de major 8 -> 9: https://pve.proxmox.com/wiki/Upgrade_from_8_to_9
+- Paquetes e ISO: https://pve.proxmox.com/wiki/Downloads
+
 Contenedor NetControl (panel WISP, este repo)
 ---------------------------------------------
 - IP ejemplo en esta red: 192.168.13.73 (CT); VM 109 «NetControls»: 192.168.13.50
 - VM 110 «vpn-hub» (Proxmox): hub VPN WireGuard; deploy/vpn-hub/ (INSTALAR-VPN-HUB.txt, MIKROTIK-BORDE.txt). En el panel: ayuda Routers / #ayuda-enlaces-mikrotik. IP LAN de ejemplo en este lab: 192.168.13.45 (DHCP; verificar con `arp` o consola si cambió).
 - Panel web: http://<IP-CT-o-VM>/netcontrol/
-- Comprobar versión del panel: http://<IP-CT>/netcontrol/nc_version.php (esperado nc_panel_ui_rev=2)
+- Comprobar versión del panel: http://<IP-CT>/netcontrol/nc_version.php (esperado nc_panel_ui_rev=3)
 - Ruta en el CT: /var/www/NetControl
 - Instalar / actualizar sistema CT: deploy/lxc-bootstrap.sh
 - Actualizar solo código (git ok): deploy/server-git-pull.sh
 - Si git pull choca con cambios locales: deploy/reset-to-origin-main.sh (hace backup de config.php)
 - Sin git: deploy/download-panel-from-github.sh
+
+Subir la copia local (Windows / XAMPP) al CT o VM
+-------------------------------------------------
+- Recomendado a largo plazo: en tu PC `git commit` + `git push`; en el servidor `git pull` (o server-git-pull.sh).
+- Rápido sin empujar a GitHub: desde PowerShell en la raíz del repo:
+    .\deploy\sync-local-to-remote.ps1 -RemoteHost IP_DEL_CT_O_VM -RemoteUser jose
+  Por defecto NO pisa `panel/config.php` del servidor (usá `-IncludePanelConfig` solo si querés copiar también el tuyo).
+  Requiere scp/ssh y sudo en el remoto.
 
 Migraciones SQL adicionales (ej. finanzas)
 ------------------------------------------
