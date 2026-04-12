@@ -1,0 +1,20 @@
+---
+description: Panel PHP — cuándo usar auth_release_session() sin romper sesión/CSRF/flash
+alwaysApply: true
+---
+
+# `auth_release_session()` en NetControl (panel PHP)
+
+- **Qué hace:** `session_write_close()` para no retener el candado de sesión durante trabajo lento (cURL, APIs, RouterOS) o peticiones en paralelo (`fetch` + página).
+
+- **Regla para el agente:** **No** añadas `auth_release_session()` en un script si **en la misma petición**, después de ese punto, puede ocurrir cualquiera de esto:
+  - `flash_set()` / lectura de flash que escriba o consuma `_flash` de forma que requiera sesión abierta de un modo que falle (en la práctica: cualquier cosa que **modifique** `$_SESSION` después del cierre).
+  - Primer uso de `csrf_token()` en esa petición (genera y guarda `_csrf` en sesión — **tiene que ir antes** del release, o no liberar en esa petición).
+  - `auth_login()` / registro de usuario en sesión / `session_regenerate_id()` / logout que aún no haya terminado.
+  - Cualquier otra escritura a `$_SESSION` después de la línea de release.
+
+- **Patrón seguro:** autenticación y todo lo que **deba** escribir en sesión **primero**; **después** `auth_release_session()`; luego solo lectura de lo ya cargado o lógica sin tocar `$_SESSION`.
+
+- **Ejemplo ya correcto en el repo:** `api_cedula_nombre.php` — solo `require_auth()` (puede redirigir con flash si no hay login; ahí la sesión sigue abierta), luego `auth_release_session()`, luego cURL/consulta externa.
+
+Si dudás, revisá `panel/includes/csrf.php` y `panel/includes/helpers.php` (`flash_set`) antes de insertar `auth_release_session()`.
