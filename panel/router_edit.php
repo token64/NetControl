@@ -250,7 +250,7 @@ require __DIR__ . '/partials/header.php';
                                 <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
                                     <label class="form-label mb-0">Ubicación <span class="text-secondary fw-normal">(opcional)</span></label>
                                     <div class="d-flex align-items-center gap-2">
-                                        <button type="button" class="btn btn-outline-light border-secondary btn-sm px-2 py-1" data-nc-geobtn
+                                        <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" data-nc-geobtn
                                                 data-nc-lat="#router_latitud" data-nc-lon="#router_longitud" data-nc-msg="#routerGeoMsg"
                                                 title="Rellenar con la posición actual (el navegador pedirá permiso; HTTPS o localhost)">
                                             <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
@@ -315,9 +315,9 @@ require __DIR__ . '/partials/header.php';
                             </div>
                         </div>
                         <dl class="small text-secondary mt-4 mb-0">
-                            <dt class="text-light">Control de velocidad</dt>
+                            <dt class="text-body-secondary">Control de velocidad</dt>
                             <dd>NetControl usa <strong>colas simples estáticas</strong> (comentario <code>NetControl-{id}</code>), como “colas simples estáticas” en otros paneles.</dd>
-                            <dt class="text-light mt-2">Traffic Flow / IP visitadas</dt>
+                            <dt class="text-body-secondary mt-2">Traffic Flow / IP visitadas</dt>
                             <dd>Opcional en RouterOS; si lo activás, es en el propio MikroTik. El panel <strong>no</strong> consulta esos módulos hoy.</dd>
                         </dl>
                     </div>

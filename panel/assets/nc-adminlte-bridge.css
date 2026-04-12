@@ -81,6 +81,19 @@ body.nc-adminlte .app-content .btn-nc-primary {
   color: #fff;
 }
 
+/* Botones pensados para fondo oscuro (outline-light) → legibles en tema claro */
+body.nc-adminlte .app-content .btn-outline-light {
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+  background-color: transparent;
+}
+
+body.nc-adminlte .app-content .btn-outline-light:hover {
+  color: #fff;
+  background-color: var(--bs-secondary);
+  border-color: var(--bs-secondary);
+}
+
 body.nc-adminlte .app-sidebar .nav-link.active {
   font-weight: 600;
 }

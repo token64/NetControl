@@ -64,7 +64,7 @@ require __DIR__ . '/partials/header.php';
                         <td class="font-monospace small"><?= esc((string) $r['rango']) ?></td>
                         <td><?= ! empty($r['activo']) ? '<span class="badge text-bg-success">Activa</span>' : '<span class="badge text-bg-secondary">Inactiva</span>' ?></td>
                         <td class="text-end">
-                            <a class="btn btn-outline-light btn-sm" href="red_edit.php?id=<?= (int) $r['id'] ?>">Editar</a>
+                            <a class="btn btn-outline-secondary btn-sm" href="red_edit.php?id=<?= (int) $r['id'] ?>">Editar</a>
                             <form class="d-inline" method="post" action="redes.php" onsubmit="return confirm('¿Eliminar esta red del catálogo?');">
                                 <?= csrf_field() ?>
                                 <input type="hidden" name="delete_id" value="<?= (int) $r['id'] ?>">

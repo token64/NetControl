@@ -76,7 +76,7 @@ require __DIR__ . '/partials/header.php';
                         <td><?= (int) $r['sort_order'] ?></td>
                         <td><?= ! empty($r['activo']) ? '<span class="badge text-bg-success">Activo</span>' : '<span class="badge text-bg-secondary">Inactivo</span>' ?></td>
                         <td class="text-end">
-                            <a class="btn btn-outline-light btn-sm" href="plan_edit.php?id=<?= (int) $r['id'] ?>">Editar</a>
+                            <a class="btn btn-outline-secondary btn-sm" href="plan_edit.php?id=<?= (int) $r['id'] ?>">Editar</a>
                             <?php if (count_clientes_plan_slug((string) $r['slug']) === 0): ?>
                                 <form class="d-inline" method="post" action="planes.php" onsubmit="return confirm('¿Eliminar este plan?');">
                                     <?= csrf_field() ?>

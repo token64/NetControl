@@ -194,6 +194,12 @@ require __DIR__ . '/partials/header.php';
     </div>
 <?php endif; ?>
 
+<?php if (! $ncCedulaLookup): ?>
+    <div class="alert alert-light border py-2 small mb-3" role="note">
+        <strong>Consulta por cédula:</strong> desactivada en <code>config.php</code>. Activá <code>CEDULA_LOOKUP_ENABLED</code> y la plantilla de URL (ver <code>config.example.php</code>) para el botón «Obtener datos».
+    </div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-lg-8">
         <div class="nc-card p-4">
@@ -235,7 +241,7 @@ require __DIR__ . '/partials/header.php';
                         <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
                             <label class="form-label mb-0">Ubicación</label>
                             <div class="d-flex align-items-center gap-2">
-                                <button type="button" class="btn btn-outline-light border-secondary btn-sm px-2 py-1" data-nc-geobtn
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" data-nc-geobtn
                                         data-nc-lat="#cliente_lat" data-nc-lon="#cliente_lon" data-nc-msg="#clienteGeoMsg"
                                         title="Rellenar con la posición actual (permiso del navegador)">
                                     <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>

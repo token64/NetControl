@@ -8,4 +8,4 @@ git pull --ff-only
 chown -R www-data:www-data "$TARGET/panel"
 systemctl reload apache2
 echo "NetControl: código actualizado y Apache recargado."
-echo "Comprobar: http://<IP>/netcontrol/nc_version.php → nc_panel_ui_rev=3"
+echo "Comprobar: http://<IP>/netcontrol/nc_version.php → nc_panel_ui_rev=4"

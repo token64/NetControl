@@ -77,8 +77,8 @@ require __DIR__ . '/partials/header.php';
                 <?php else: ?>
                     <ul class="list-group list-group-flush nc-map-list flex-grow-1 overflow-auto">
                         <?php foreach ($markers as $m): ?>
-                            <li class="list-group-item nc-map-list-item border-secondary border-opacity-25 bg-transparent text-light px-3 py-2">
-                                <button type="button" class="btn btn-link text-start text-decoration-none p-0 text-light w-100 nc-map-focus" data-id="<?= (int) $m['id'] ?>" data-lat="<?= esc((string) $m['lat']) ?>" data-lng="<?= esc((string) $m['lng']) ?>">
+                            <li class="list-group-item nc-map-list-item border-secondary border-opacity-25 bg-transparent text-body px-3 py-2">
+                                <button type="button" class="btn btn-link text-start text-decoration-none p-0 text-body w-100 nc-map-focus" data-id="<?= (int) $m['id'] ?>" data-lat="<?= esc((string) $m['lat']) ?>" data-lng="<?= esc((string) $m['lng']) ?>">
                                     <span class="fw-semibold d-block text-truncate"><?= esc($m['title']) ?></span>
                                     <span class="small text-secondary"><?= esc($m['estado']) ?></span>
                                 </button>

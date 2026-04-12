@@ -158,6 +158,13 @@ require __DIR__ . '/partials/header.php';
 
 <h1 class="h3 mb-4">Nuevo cliente</h1>
 
+<?php if (! $ncCedulaLookup): ?>
+    <div class="alert alert-light border py-2 small mb-3" role="note">
+        <strong>Consulta por cédula:</strong> en este servidor está desactivada. Editá <code>panel/config.php</code> y definí
+        <code>CEDULA_LOOKUP_ENABLED = true</code> y <code>CEDULA_LOOKUP_URL_TEMPLATE</code> (copiá desde <code>config.example.php</code>) para mostrar el botón «Obtener datos» junto a la cédula.
+    </div>
+<?php endif; ?>
+
 <?php if ($errors !== []): ?>
     <div class="alert alert-danger nc-flash">
         <ul class="mb-0">
@@ -211,7 +218,7 @@ require __DIR__ . '/partials/header.php';
                         <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
                             <label class="form-label mb-0">Ubicación</label>
                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <button class="btn btn-outline-light border-secondary btn-sm px-2 py-1" type="button" id="btnGeo" data-nc-geobtn
+                                <button class="btn btn-outline-secondary btn-sm px-2 py-1" type="button" id="btnGeo" data-nc-geobtn
                                         data-nc-lat="#lat" data-nc-lon="#lon" data-nc-msg="#crearGeoMsg"
                                         title="Rellenar con la posición actual">
                                     <i class="bi bi-geo-alt-fill me-1" aria-hidden="true"></i>Usar mi ubicación
