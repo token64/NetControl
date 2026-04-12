@@ -58,4 +58,12 @@ PVE 9.x no permite "ejecutar bash dentro del LXC" por la API HTTP. Opciones:
     deploy\pve-sync-netcontrol.ps1   (usa tu proxmox.credentials.json y encuentra vmid por IP)
 - O SSH al hipervisor (.215) y el mismo "pct exec <vmid> -- bash -lc '...'"
 
+VM Linux con qemu-guest-agent (ej. 109 «NetControls», IP .50): sí se puede por API HTTP
+usando agent/exec + agent/exec-status. Desde tu PC (PowerShell), con el mismo
+proxmox.credentials.json:
+    .\deploy\proxmox-vm-guest-git-deploy.ps1
+  Parámetros típicos: -Node proxmox -Vmid 109 -RepoPath /var/www/NetControl
+  El token de API necesita permisos de agente en esa VM; git corre en el invitado
+  (root vía guest agent); si el repo no es de root, ya usa git -c safe.directory=...
+
 Nota: Las IPs pueden cambiar; ajustá según tu red.
