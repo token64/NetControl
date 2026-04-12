@@ -14,6 +14,20 @@ function require_auth(): void
     }
 }
 
+/**
+ * Libera el bloqueo de sesión en el servidor (session_write_close).
+ * PHP mantiene la sesión bloqueada desde session_start() hasta el fin del script;
+ * si una página hace trabajo lento (p. ej. cURL) o el navegador dispara varias
+ * peticiones en paralelo (fetch + documento principal), conviene llamar esto
+ * en cuanto esta petición ya no vaya a modificar $_SESSION.
+ */
+function auth_release_session(): void
+{
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+}
+
 function auth_login(string $user, string $password): bool
 {
     if ($user !== ADMIN_USER) {

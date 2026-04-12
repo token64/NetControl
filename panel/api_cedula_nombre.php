@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/bootstrap.php';
 require_auth();
+auth_release_session();
 require_once __DIR__ . '/includes/cedula_lookup.php';
 
 header('Content-Type: application/json; charset=UTF-8');
